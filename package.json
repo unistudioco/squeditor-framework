@@ -1,0 +1,24 @@
+{
+  "name": "squeditor-framework",
+  "version": "1.0.0",
+  "description": "**Squeditor Framework** is a high-performance, developer-first framework for building lightning-fast, static websites. It combines the power of **PHP-style templating** with the modern performance of **Tailwind CSS**, the interactivity of **UIKit 3**, and the speed of **Vite**.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unistudioco/squeditor-framework.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/unistudioco/squeditor-framework/issues"
+  },
+  "homepage": "https://github.com/unistudioco/squeditor-framework#readme",
+  "bin": {
+    "squeditor-framework": "./scripts/scaffold.js"
+  }
+}

@@ -46,10 +46,9 @@ Every project includes an automatically generated `style-guide.php` page that re
 ## 🏁 Getting Started
 
 ### 1. Installation
-Clone the repository to serve as your core workspace root:
+Clone the repository into your desired workspace folder. This folder will house both the framework and your generated projects:
 ```bash
 git clone https://github.com/unistudioco/squeditor-framework.git
-cd squeditor-framework
 ```
 
 ### 2. Scaffold a New Project
@@ -57,14 +56,13 @@ Squeditor includes a robust CLI scaffolding tool. It generates a completely clea
 
 To scaffold your new project as a sibling to the framework directory, run the following command from your workspace root (outside `squeditor-framework`):
 ```bash
-cd ..
-node squeditor-framework/scripts/scaffold.js my-awesome-project
+npx squeditor-framework your-project-name
 ```
 
 ### 3. Development
 Navigate into your newly generated project folder, install its dependencies, and start the development server:
 ```bash
-cd my-awesome-project
+cd your-project-name
 npm install
 npm run dev
 ```

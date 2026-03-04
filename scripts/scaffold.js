@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // scripts/scaffold.js
 const fs = require('fs');
 const path = require('path');
