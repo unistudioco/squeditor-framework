@@ -1,0 +1,36 @@
+// src/assets/scss/_transitions.scss
+
+.sq-page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+
+    &.is-active {
+        pointer-events: all;
+    }
+
+    svg,
+    .sq-transition-slide,
+    .sq-transition-blinds {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    svg {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .sq-transition-blinds {
+        display: flex;
+    }
+}

@@ -1,0 +1,248 @@
+{
+    "_core": {
+        "js": [
+            "node_modules/uikit/dist/js/uikit.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/variables.scss",
+            "node_modules/uikit/src/scss/mixins.scss",
+            "node_modules/uikit/src/scss/components/mixin.scss"
+        ]
+    },
+    "sticky": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/sticky.scss"
+        ]
+    },
+    "utility": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/utility.scss"
+        ]
+    },
+    "animation": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/animation.scss"
+        ]
+    },
+    "visibility": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/visibility.scss"
+        ]
+    },
+    "width": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/width.scss"
+        ]
+    },
+    "height": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/height.scss"
+        ]
+    },
+    "position": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/position.scss"
+        ]
+    },
+    "cover": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/cover.scss"
+        ]
+    },
+    "grid": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/grid.scss"
+        ]
+    },
+    "nav": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/nav.scss"
+        ]
+    },
+    "navbar": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/navbar.scss"
+        ]
+    },
+    "modal": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/modal.scss",
+            "node_modules/uikit/src/scss/components/close.scss"
+        ]
+    },
+    "close": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/close.scss"
+        ]
+    },
+    "accordion": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/accordion.scss"
+        ]
+    },
+    "tabs": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/tab.scss"
+        ]
+    },
+    "switcher": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/switcher.scss"
+        ]
+    },
+    "offcanvas": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/offcanvas.scss"
+        ]
+    },
+    "drop": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/drop.scss"
+        ]
+    },
+    "dropbar": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/dropbar.scss"
+        ]
+    },
+    "dropnav": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/dropnav.scss"
+        ]
+    },
+    "dropdown": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/dropdown.scss"
+        ]
+    },
+    "tooltip": {
+        "js": [
+            "node_modules/uikit/dist/js/components/tooltip.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/tooltip.scss"
+        ]
+    },
+    "parallax": {
+        "js": [
+            "node_modules/uikit/dist/js/components/parallax.js"
+        ],
+        "css": []
+    },
+    "scrollspy": {
+        "js": [],
+        "css": []
+    },
+    "transition": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/transition.scss"
+        ]
+    },
+    "spinner": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/spinner.scss"
+        ]
+    },
+    "inverse": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/inverse.scss"
+        ]
+    },
+    "svg": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/svg.scss"
+        ]
+    },
+    "video": {
+        "js": [],
+        "css": []
+    },
+    "iframe": {
+        "js": [],
+        "css": []
+    },
+    "notification": {
+        "js": [
+            "node_modules/uikit/dist/js/components/notification.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/notification.scss"
+        ]
+    },
+    "pagination": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/pagination.scss"
+        ]
+    },
+    "dotnav": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/dotnav.scss"
+        ]
+    },
+    "slidenav": {
+        "js": [],
+        "css": [
+            "node_modules/uikit/src/scss/components/slidenav.scss"
+        ]
+    },
+    "slider": {
+        "js": [
+            "node_modules/uikit/dist/js/components/slider.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/slider.scss"
+        ]
+    },
+    "slideshow": {
+        "js": [
+            "node_modules/uikit/dist/js/components/slideshow.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/slideshow.scss"
+        ]
+    },
+    "lightbox": {
+        "js": [
+            "node_modules/uikit/dist/js/components/lightbox.js",
+            "node_modules/uikit/dist/js/components/lightbox-panel.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/lightbox.scss"
+        ]
+    },
+    "icon": {
+        "js": [
+            "node_modules/uikit/dist/js/uikit-icons.min.js"
+        ],
+        "css": [
+            "node_modules/uikit/src/scss/components/icon.scss"
+        ]
+    }
+}

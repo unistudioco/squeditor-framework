@@ -1,0 +1,81 @@
+// _functions.scss
+@use "sass:math";
+@use "sass:meta";
+@use "sass:color";
+
+// Calculate relative luminance based on WCAG formulas
+@function luminance($color) {
+    @if meta.type-of($color) !='color' {
+        @return 0; // Fallback
+    }
+
+    $r: math.div(color.channel($color, "red", $space: rgb), 255);
+    $g: math.div(color.channel($color, "green", $space: rgb), 255);
+    $b: math.div(color.channel($color, "blue", $space: rgb), 255);
+
+    @if $r <=0.03928 {
+        $r: math.div($r, 12.92);
+    }
+
+    @else {
+        $r: math.pow(math.div($r + 0.055, 1.055), 2.4);
+    }
+
+    @if $g <=0.03928 {
+        $g: math.div($g, 12.92);
+    }
+
+    @else {
+        $g: math.pow(math.div($g + 0.055, 1.055), 2.4);
+    }
+
+    @if $b <=0.03928 {
+        $b: math.div($b, 12.92);
+    }
+
+    @else {
+        $b: math.pow(math.div($b + 0.055, 1.055), 2.4);
+    }
+
+    @return (0.2126 * $r)+(0.7152 * $g)+(0.0722 * $b);
+}
+
+// Calculate true contrast ratio between two colors
+@function contrast-ratio($color1, $color2) {
+    $luminance1: luminance($color1);
+    $luminance2: luminance($color2);
+
+    $l1: math.max($luminance1, $luminance2);
+    $l2: math.min($luminance1, $luminance2);
+
+    @return math.div($l1 + 0.05, $l2 + 0.05);
+}
+
+// Automatically choose light or dark text based on a minimum contrast threshold
+@function sq-color-contrast($background, $light: $sq-contrast-light-text, $dark: $sq-contrast-dark-text, $min-contrast: $sq-min-contrast-ratio) {
+    @if meta.type-of($background) !='color' {
+        @return $dark; // Safe fallback if a CSS variable is passed directly
+    }
+
+    $light-ratio: contrast-ratio($background, $light);
+    $dark-ratio: contrast-ratio($background, $dark);
+
+    // If light text meets the minimum threshold, ALWAYS prefer it (forces white text on teal/blue).
+    @if $light-ratio >=$min-contrast {
+        @return $light;
+    }
+
+    // If light text fails but dark text meets the minimum threshold, use dark.
+    @if $dark-ratio >=$min-contrast {
+        @return $dark;
+    }
+
+    // If NEITHER meets the minimum, fallback to whichever one is strictly higher.
+    @if $light-ratio >$dark-ratio {
+        @return $light;
+    }
+
+    @else {
+        @return $dark;
+    }
+}

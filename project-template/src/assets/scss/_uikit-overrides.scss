@@ -1,0 +1,187 @@
+// _uikit-overrides.scss
+
+// 0. Base
+.uk-text-center {
+    text-align: center;
+}
+
+// 1. Accordion
+.uk-accordion {
+    @apply space-y-4;
+
+    &-title {
+        background: var(--sq-accordion-title-bg);
+        color: var(--sq-accordion-title-text);
+
+        @apply text-lg font-bold py-4 px-6 rounded-lg transition-colors hover:bg-opacity-90 flex items-center justify-between !no-underline;
+
+        &::after {
+            @apply transition-transform duration-300;
+        }
+    }
+
+    &-card {
+        @apply border p-4;
+        border-radius: var(--sq-radius);
+        border-color: var(--sq-accordion-border);
+    }
+
+    &-divider {
+        >li:not(:last-child) {
+            border-bottom: 1px solid var(--sq-accordion-border);
+        }
+    }
+
+    &-title {
+        &::after {
+            content: "\e9e8";
+            font-family: "Squeditor Icons";
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+    }
+
+    .uk-open>&-title {
+        &::after {
+            @apply -rotate-90;
+        }
+    }
+
+    &-content {
+        color: var(--sq-accordion-content-text);
+        @apply py-4 px-6 leading-relaxed;
+    }
+}
+
+// 2. Tabs
+.uk-tab {
+    @apply relative flex items-center gap-2 mb-8 ml-0;
+
+    &::before {
+        content: "";
+        @apply absolute bottom-0 left-0 right-0 w-full border-b;
+    }
+
+    >li {
+        @apply p-0;
+
+        &.uk-active>a {
+            color: var(--sq-tab-active-text);
+            border-color: var(--sq-tab-active-border);
+            @apply bg-transparent;
+        }
+
+        >a {
+            color: var(--sq-tab-text);
+            @apply px-4 py-2 text-base font-semibold border-b-2 border-transparent transition-all !no-underline hover:text-opacity-80;
+        }
+    }
+}
+
+// 3. Offcanvas
+.uk-offcanvas-bar {
+    background: var(--sq-offcanvas-bg);
+    color: var(--sq-offcanvas-text);
+    border-right: 1px solid var(--sq-offcanvas-border);
+    width: var(--sq-offcanvas-width);
+    padding: var(--sq-offcanvas-padding);
+
+    @apply shadow-xl;
+
+    .uk-offcanvas-close {
+        color: var(--sq-offcanvas-close-color);
+        @apply top-4 right-4 hover:opacity-70 transition-colors;
+    }
+
+    // Default Nav styling inside Offcanvas
+    .uk-nav-default {
+        >li>a {
+            @apply hover:text-secondary transition-colors py-2 px-0;
+            color: inherit;
+            opacity: 0.8;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        >li.uk-active>a {
+            @apply font-bold;
+            opacity: 1;
+        }
+    }
+}
+
+// 4. Dropdown Nav
+.uk-navbar {
+
+    &-nav {
+        display: flex;
+        gap: var(--sq-navbar-nav-gap);
+    }
+
+    &-nav>li>a,
+    &-item,
+    &-toggle {
+        @apply transition-all;
+        min-height: var(--sq-navbar-nav-min-height);
+        color: var(--sq-navbar-nav-color);
+        padding: var(--sq-navbar-nav-padding);
+
+        &:hover {
+            color: var(--sq-navbar-nav-hover-color);
+        }
+    }
+
+    &-dropdown {
+        width: var(--sq-dropdown-width);
+        padding: var(--sq-dropdown-padding);
+        background: var(--sq-dropdown-bg);
+        color: var(--sq-dropdown-text);
+
+        @apply shadow-xl;
+    }
+
+    a {
+        text-decoration: none !important;
+    }
+}
+
+// 5. Sticky
+.uk-sticky {
+    @apply transition-all duration-300 ease-in-out;
+    z-index: 1000;
+
+    &.sq-header--sticky {
+        background: var(--sq-sticky-bg);
+        color: var(--sq-sticky-text);
+    }
+}
+
+// 6. Modal
+.uk-modal-dialog {
+    background: var(--sq-modal-bg);
+    color: var(--sq-modal-text);
+    border-radius: var(--sq-modal-radius);
+    padding: var(--sq-modal-padding);
+    box-shadow: var(--sq-shadow-xl);
+
+    .uk-modal-header {
+        border-bottom: 1px solid var(--sq-modal-border);
+        padding: var(--sq-modal-padding);
+    }
+
+    .uk-modal-footer {
+        border-top: 1px solid var(--sq-modal-border);
+        padding: var(--sq-modal-padding);
+    }
+}
+
+// 7. Dropdown
+.uk-dropdown {
+    background: var(--sq-dropdown-bg);
+    color: var(--sq-dropdown-text);
+    border-radius: var(--sq-radius);
+    padding: var(--sq-dropdown-padding);
+    box-shadow: var(--sq-shadow-xl);
+}

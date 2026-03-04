@@ -1,0 +1,13 @@
+// _config.scss
+// Framework Configuration Variables
+// ==========================================
+
+// Global Auto-Contrast Minimum Threshold 
+// Adjust this to change when button text flips from dark to light.
+// 4.5 = Strict WCAG AA contrast
+// 2.5 = Loose UI preference (default)
+$sq-min-contrast-ratio: 2.5;
+
+// Global Text Colors for Auto-Contrast
+$sq-contrast-dark-text: #19191b;
+$sq-contrast-light-text: #ffffff;

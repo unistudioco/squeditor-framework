@@ -1,0 +1,140 @@
+// _base.scss
+
+*,
+::before,
+::after {
+    border-color: var(--sq-color-border);
+}
+
+body {
+    font-family: var(--sq-font-sans);
+    color: var(--sq-color-body-text);
+    background-color: var(--sq-color-body-bg);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.sq-nav-link,
+.btn {
+    font-family: var(--sq-font-heading);
+    color: var(--sq-color-heading-text);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin-bottom: 0.75em;
+}
+
+h1 {
+    @apply text-4xl lg:text-5xl;
+}
+
+h2 {
+    @apply text-3xl lg:text-4xl;
+}
+
+h3 {
+    @apply text-2xl lg:text-3xl;
+}
+
+h4 {
+    @apply text-xl lg:text-2xl;
+}
+
+h5 {
+    @apply text-lg lg:text-xl;
+}
+
+h6 {
+    @apply text-base lg:text-lg;
+}
+
+.text-muted {
+    color: var(--sq-color-muted-text);
+}
+
+.bg-muted {
+    background-color: var(--sq-color-muted-bg);
+}
+
+// Headline Highlight Effect
+.sq-highlight {
+    @apply bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent;
+    display: inline-block;
+    position: relative;
+}
+
+// Badge styling
+.sq-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium tracking-tight mb-6 border;
+    color: var(--sq-color-secondary);
+}
+
+// Only apply paragraph and list styles if the author didn't supply their own layout classes
+p:not([class]) {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+ul:not([class]),
+ol:not([class]) {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+ul:not([class]) {
+    list-style-type: disc;
+}
+
+ol:not([class]) {
+    list-style-type: decimal;
+}
+
+pre,
+code {
+    @apply bg-fuchsia-600/5 text-fuchsia-700;
+    font-family: var(--sq-font-mono);
+    padding: 0.1rem 0.25rem;
+    border-radius: var(--sq-radius-sm);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+pre {
+    @apply bg-zinc-600/5 text-zinc-600;
+    padding: 1rem;
+    border-radius: var(--sq-radius-md);
+    overflow-x: auto;
+}
+
+.sq-theme-dark {
+    code {
+        @apply bg-zinc-100/5 text-fuchsia-400;
+    }
+
+    pre {
+        @apply bg-zinc-100/5 text-zinc-100;
+    }
+}
+
+// Ensure default UIKit links without classes use the secondary color
+a:not([class]) {
+    color: var(--sq-color-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}

@@ -1,0 +1,229 @@
+// _tokens.scss — Design tokens as CSS custom properties
+
+// 1. Define SASS Variables for calculations
+$color-primary: #1c2020 !default;
+$color-primary-dark: #ffffff !default;
+$color-secondary: #038677 !default;
+$color-secondary-dark: #d5f37b !default;
+$color-accent: #F0FF44 !default;
+$color-accent-dark: #F0FF44 !default;
+$color-white: #FFFFFF !default;
+$color-muted-text: #777f7f !default;
+$color-muted-bg: #f8f8f8 !default;
+$color-light: #f8f8f8 !default;
+$color-body-bg: #FFFFFF !default;
+$color-body-text: #19191b !default;
+$color-heading-text: #19191b !default;
+$color-border: rgba(138, 138, 138, 0.196) !default;
+
+:root {
+    // Brand colors
+    --sq-color-primary: #{$color-primary};
+    --sq-color-primary-contrast: #{sq-color-contrast($color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$color-secondary};
+    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$color-accent};
+    --sq-color-accent-contrast: #{sq-color-contrast($color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-white: #{$color-white};
+    --sq-color-muted-text: #{$color-muted-text};
+    --sq-color-muted-bg: #{$color-muted-bg};
+    --sq-color-light: #{$color-light};
+    --sq-color-body-bg: #{$color-body-bg};
+    --sq-color-body-text: #{$color-body-text};
+    --sq-color-heading-text: #{$color-heading-text};
+    --sq-color-border: #{$color-border};
+
+    // Typography
+    --sq-font-sans: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --sq-font-heading: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --sq-font-serif: 'Georgia', 'Times New Roman', serif;
+    --sq-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    // Spacing scale
+    --sq-space-xs: 0.25rem;
+    --sq-space-sm: 0.5rem;
+    --sq-space-md: 1rem;
+    --sq-space-lg: 2rem;
+    --sq-space-xl: 4rem;
+    --sq-space-2xl: 8rem;
+
+    // Border radius
+    --sq-radius-xs: 0.15rem;
+    --sq-radius-sm: 0.25rem;
+    --sq-radius-md: 0.5rem;
+    --sq-radius-lg: 0.75rem;
+    --sq-radius-xl: 1rem;
+    --sq-radius-2xl: 1.5rem;
+    --sq-radius-3xl: 2rem;
+    --sq-radius-full: 9999px;
+
+    // Shadows
+    --sq-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --sq-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --sq-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+
+    // Z-index scale
+    --sq-z-sticky: 980;
+    --sq-z-offcanvas: 1000;
+    --sq-z-modal: 1100;
+    --sq-z-tooltip: 1200;
+
+    // Page Transitions
+    --sq-page-transition-from: var(--sq-color-secondary);
+    --sq-page-transition-via: var(--sq-color-accent);
+    --sq-page-transition-to: var(--sq-color-accent);
+
+    // --- Component Tokens ---
+
+    // Buttons
+    --sq-btn-height: 2.25rem; // h-9
+    --sq-btn-bg: transparent;
+    --sq-btn-text: var(--sq-color-body-text);
+    --sq-btn-radius: var(--sq-radius-lg);
+    --sq-btn-font-size: 1rem; // text-base
+    --sq-btn-font-weight: 500;
+
+    --sq-btn-default-bg: var(--sq-color-light);
+    --sq-btn-default-text: var(--sq-color-muted-text);
+    --sq-btn-primary-bg: var(--sq-color-primary);
+    --sq-btn-primary-text: var(--sq-color-primary-contrast);
+    --sq-btn-secondary-bg: var(--sq-color-secondary);
+    --sq-btn-secondary-text: var(--sq-color-secondary-contrast);
+    --sq-btn-accent-bg: var(--sq-color-accent);
+    --sq-btn-accent-text: var(--sq-color-accent-contrast);
+    --sq-btn-ghost-hover-bg: var(--sq-color-light);
+
+    // Forms
+    --sq-form-min-height: 2.5rem; // h-10
+    --sq-form-padding: 0.75rem;
+    --sq-form-bg: var(--sq-color-white);
+    --sq-form-border: #E2E8F0; // zinc-200
+    --sq-form-text: var(--sq-color-body-text);
+    --sq-form-radius: var(--sq-radius-md);
+    --sq-form-focus-ring: rgba(15, 23, 42, 0.1); // primary w/ opacity
+    --sq-form-focus-border: var(--sq-color-primary);
+
+    // Navbar
+    --sq-navbar-nav-min-height: 60px;
+    --sq-navbar-nav-padding: 0px;
+    --sq-navbar-nav-gap: 1.75rem;
+    --sq-navbar-nav-color: var(--sq-color-body-text);
+    --sq-navbar-nav-hover-color: var(--sq-color-secondary);
+
+    // Dropdown
+    --sq-dropdown-width: 300px;
+    --sq-dropdown-padding: 2rem;
+    --sq-dropdown-bg: var(--sq-color-white);
+    --sq-dropdown-text: var(--sq-color-body-text);
+
+    // Accordion
+    --sq-accordion-title-bg: #8b8b8b15; // zinc-50
+    --sq-accordion-title-text: var(--sq-color-primary);
+    --sq-accordion-content-text: var(--sq-color-muted-text); // zinc-600
+
+    // Tabs
+    --sq-tab-text: #94A3B8; // zinc-400
+    --sq-tab-active-text: var(--sq-color-primary);
+    --sq-tab-active-border: var(--sq-color-primary);
+
+    // Offcanvas
+    --sq-offcanvas-width: 300px;
+    --sq-offcanvas-padding: 2rem;
+    --sq-offcanvas-bg: var(--sq-color-white);
+    --sq-offcanvas-text: var(--sq-color-body-text);
+    --sq-offcanvas-border: var(--sq-color-border);
+    --sq-offcanvas-close-color: var(--sq-color-muted-text);
+
+    // Cards
+    --sq-card-bg: var(--sq-color-white);
+    --sq-card-border: var(--sq-color-border);
+    --sq-card-shadow: var(--sq-shadow-sm);
+    --sq-card-shadow-hover: var(--sq-shadow-md);
+
+    // Modal
+    --sq-modal-padding: 1.75rem;
+    --sq-modal-border: var(--sq-color-border);
+    --sq-modal-bg: var(--sq-color-white);
+    --sq-modal-text: var(--sq-color-body-text);
+    --sq-modal-close-color: var(--sq-color-muted-text);
+    --sq-modal-radius: var(--sq-radius-lg);
+
+    // Sticky
+    --sq-sticky-bg: var(--sq-color-white);
+    --sq-sticky-text: var(--sq-color-body-text);
+
+    // Drop
+    --sq-drop-bg: var(--sq-color-white);
+    --sq-drop-text: var(--sq-color-body-text);
+    --sq-drop-border: var(--sq-color-border);
+    --sq-drop-close-color: var(--sq-color-muted-text);
+}
+
+// Global Schema Overrides
+.sq-theme-dark {
+    // Brand colors (Dark Mode Specific Overrides)
+    --sq-color-primary: #{$color-primary-dark};
+    --sq-color-primary-contrast: #{sq-color-contrast($color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$color-secondary-dark};
+    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$color-accent-dark};
+    --sq-color-accent-contrast: #{sq-color-contrast($color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+
+    // Standard structural adjustments
+    --sq-color-body-bg: #19191b;
+    --sq-color-body-text: #F1F5F9;
+    --sq-color-heading-text: #ffffff;
+    --sq-color-muted-text: #c7cacd;
+    --sq-color-muted-bg: #272729;
+
+    // Buttons
+    --sq-btn-default-bg: var(--sq-color-light);
+    --sq-btn-default-text: var(--sq-color-muted-text);
+    --sq-btn-primary-bg: var(--sq-color-primary);
+    --sq-btn-primary-text: var(--sq-color-primary-contrast);
+    --sq-btn-secondary-bg: var(--sq-color-secondary);
+    --sq-btn-secondary-text: var(--sq-color-secondary-contrast);
+    --sq-btn-accent-bg: var(--sq-color-accent);
+    --sq-btn-accent-text: var(--sq-color-accent-contrast);
+    --sq-btn-ghost-hover-bg: var(--sq-color-muted-bg); // zinc-100
+
+    // Forms
+    --sq-form-bg: #19191b;
+    --sq-form-border: #8d8d8d1c;
+    --sq-form-text: #F1F5F9;
+    --sq-form-focus-ring: rgba(99, 102, 241, 0.2); // secondary w/ opacity
+    --sq-form-focus-border: var(--sq-color-secondary);
+
+    // Accordion
+    --sq-accordion-title-text: #F1F5F9;
+    --sq-accordion-content-text: var(--sq-color-muted-text);
+
+    // Tabs
+    --sq-tab-text: var(--sq-color-muted-text);
+    --sq-tab-active-text: #FFFFFF;
+    --sq-tab-active-border: var(--sq-color-secondary);
+
+    // Offcanvas
+    --sq-offcanvas-bg: #19191b;
+    --sq-offcanvas-text: #F1F5F9;
+    --sq-offcanvas-close-color: var(--sq-color-muted-text);
+
+    // Modal
+    --sq-modal-bg: #19191b;
+    --sq-modal-text: #F1F5F9;
+    --sq-modal-close-color: var(--sq-color-muted-text);
+
+    // Sticky
+    --sq-sticky-bg: #19191b;
+    --sq-sticky-text: #F1F5F9;
+
+    // Drop
+    --sq-drop-bg: #19191b;
+    --sq-drop-text: #F1F5F9;
+    --sq-drop-close-color: var(--sq-color-muted-text);
+
+    // Cards
+    --sq-card-bg: #19191b;
+    --sq-card-shadow: none;
+    --sq-card-shadow-hover: none;
+}

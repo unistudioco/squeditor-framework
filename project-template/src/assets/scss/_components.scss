@@ -1,0 +1,165 @@
+// _components.scss
+
+// 1. Buttons
+.btn {
+    appearance: none;
+    background: var(--sq-btn-bg);
+    color: var(--sq-btn-text);
+    border-radius: var(--sq-btn-radius);
+    height: var(--sq-btn-height);
+    font-size: var(--sq-btn-font-size);
+    font-weight: var(--sq-btn-font-weight);
+
+    @apply inline-flex items-center justify-center gap-2 py-0 px-4 transition-colors transition-all duration-200 cursor-pointer border-none outline-none no-underline;
+}
+
+.btn-sm {
+    @apply text-sm px-3;
+    height: 2rem;
+}
+
+.btn-lg {
+    @apply text-lg px-6;
+    height: 3rem;
+}
+
+.btn-default {
+    --sq-btn-bg: var(--sq-btn-default-bg);
+    --sq-btn-text: var(--sq-btn-default-text);
+    @apply hover:bg-opacity-90;
+}
+
+.btn-primary {
+    --sq-btn-bg: var(--sq-btn-primary-bg);
+    --sq-btn-text: var(--sq-btn-primary-text);
+    @apply hover:bg-opacity-90;
+}
+
+.btn-secondary {
+    --sq-btn-bg: var(--sq-btn-secondary-bg);
+    --sq-btn-text: var(--sq-btn-secondary-text);
+    @apply hover:bg-opacity-90;
+}
+
+.btn-ghost {
+    --sq-btn-bg: transparent;
+    --sq-btn-text: var(--sq-color-body-text);
+
+    &:hover {
+        background: var(--sq-btn-ghost-hover-bg);
+    }
+}
+
+.btn-accent {
+    --sq-btn-bg: var(--sq-btn-accent-bg);
+    --sq-btn-text: var(--sq-btn-accent-text);
+    @apply hover:bg-opacity-90;
+}
+
+// 2. Form Elements
+.form-input,
+.form-select,
+.form-textarea {
+    background: var(--sq-form-bg);
+    border: 1px solid var(--sq-form-border);
+    color: var(--sq-form-text);
+    border-radius: var(--sq-form-radius);
+    min-height: var(--sq-form-min-height);
+    padding: var(--sq-form-padding);
+    padding-top: 0;
+    padding-bottom: 0;
+
+    @apply w-full text-base shadow-sm transition-all outline-none;
+
+    &:focus {
+        border-color: var(--sq-form-focus-border);
+        box-shadow: 0 0 0 4px var(--sq-form-focus-ring);
+    }
+
+    &:disabled {
+        @apply bg-zinc-50;
+    }
+}
+
+.form-textarea {
+    min-height: 5rem;
+    padding-top: var(--sq-form-padding);
+    padding-bottom: var(--sq-form-padding);
+}
+
+.form-checkbox,
+.form-radio {
+    @apply w-4 h-4 border border-solid border-zinc-200 outline-none;
+}
+
+.form-label {
+    @apply block text-sm font-medium mb-1 opacity-60;
+}
+
+// 3. Squeditor Cards & Headers
+.sq-card {
+    background: var(--sq-card-bg);
+    border: 1px solid var(--sq-card-border);
+    border-radius: var(--sq-radius-lg);
+    padding: var(--sq-space-lg);
+    transition: all 0.3s ease;
+
+    &:hover {
+        box-shadow: var(--sq-card-shadow-hover);
+        transform: translateY(-4px);
+    }
+}
+
+.sq--header {
+    z-index: var(--sq-z-sticky);
+
+    &--sticky {
+        box-shadow: var(--sq-shadow-sm);
+        backdrop-filter: blur(10px);
+    }
+}
+
+.sq-theme-dark {
+    .sq-header--sticky {
+        background: rgb(0 0 0 / 75%);
+    }
+}
+
+// ---------------------------------------------------------
+// Page Transitions
+// ---------------------------------------------------------
+
+.sq-page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none;
+    overflow: hidden;
+
+    &.is-active {
+        pointer-events: all;
+    }
+
+    svg,
+    .sq-transition-slide,
+    .sq-transition-blinds {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    svg {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .sq-transition-blinds {
+        display: flex;
+    }
+}

@@ -1,0 +1,31 @@
+// _utilities.scss
+
+.sq-text-gradient {
+    background: linear-gradient(135deg, var(--sq-color-primary), var(--sq-color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+// Background and Contrast Text Utilities
+.sq-bg-primary {
+    --sq-contrast-color: var(--sq-color-primary-contrast);
+    background-color: var(--sq-color-primary) !important;
+    color: var(--sq-contrast-color) !important;
+}
+
+.sq-bg-secondary {
+    --sq-contrast-color: var(--sq-color-secondary-contrast);
+    background-color: var(--sq-color-secondary) !important;
+    color: var(--sq-contrast-color) !important;
+}
+
+.sq-bg-accent {
+    --sq-contrast-color: var(--sq-color-accent-contrast);
+    background-color: var(--sq-color-accent) !important;
+    color: var(--sq-contrast-color) !important;
+}
+
+.sq-text-contrast {
+    color: var(--sq-contrast-color, inherit) !important;
+}
