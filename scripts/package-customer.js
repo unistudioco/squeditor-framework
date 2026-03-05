@@ -16,7 +16,7 @@ try {
     ffmpeg = require(path.join(projectRoot, 'node_modules/fluent-ffmpeg'));
 } catch (e) { }
 
-const customerBuildDir = path.join(projectRoot, 'build-customer-package');
+const customerBuildDir = path.join(projectRoot, config.name || 'customer-package');
 const distDir = path.join(projectRoot, 'dist');
 const srcDir = path.join(projectRoot, 'src');
 const zipName = config.dist.zipName ? config.dist.zipName.replace('.zip', '-customer.zip') : 'customer-package.zip';

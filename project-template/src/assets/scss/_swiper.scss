@@ -1,0 +1,30 @@
+/* Swiper framework overrides */
+.swiper {
+  --swiper-theme-color: var(--sq-color-primary, #000);
+  --swiper-navigation-size: 20px;
+  
+  &-pagination-bullet {
+    background: var(--sq-color-primary, #000);
+    opacity: 0.3;
+    transition: all 0.3s ease;
+    
+    &-active {
+      opacity: 1;
+      width: 24px;
+      border-radius: 4px;
+    }
+  }
+
+  &-button-next,
+  &-button-prev {
+    transition: all 0.3s ease;
+    &:hover {
+      transform: translateY(-50%) scale(1.05);
+    }
+    
+    &.swiper-button-disabled {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}

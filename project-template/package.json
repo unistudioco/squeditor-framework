@@ -1,5 +1,5 @@
 {
-  "name": "my-project-name",
+  "name": "../new-project-name",
   "private": true,
   "scripts": {
     "dev": "node ../squeditor-framework/scripts/dev.js",
@@ -11,7 +11,9 @@
     "preview:vercel": "vercel dist --yes"
   },
   "dependencies": {
+    "@splidejs/splide": "^4.1.4",
     "gsap": "^3.13.0",
+    "swiper": "^12.1.2",
     "uikit": "^3.21.0"
   },
   "devDependencies": {

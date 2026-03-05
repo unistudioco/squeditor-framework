@@ -52,7 +52,8 @@ const frameworkTargetDir = path.resolve(process.cwd(), 'squeditor-framework');
 
 if (!fs.existsSync(frameworkTargetDir)) {
     console.log(`[Squeditor] Installing local framework core at ./squeditor-framework...`);
-    const ignoreCoreList = ['project-template', 'showcase', 'node_modules', '.git', '.github'];
+    // Pass the name of the target directory to the ignore list to prevent infinite loop
+    const ignoreCoreList = ['project-template', 'showcase', 'node_modules', '.git', '.github', 'squeditor-framework'];
     copyDirectory(frameworkSourceDir, frameworkTargetDir, ignoreCoreList);
 }
 

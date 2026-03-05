@@ -35,7 +35,6 @@ async function startDev() {
         env: { ...process.env, SQUEDITOR_PHP_PORT: phpPort, SQUEDITOR_VITE_PORT: vitePort }
     });
 
-    // Start Vite
     const vite = spawn('npx', [
         'vite',
         '--port', vitePort.toString(),
@@ -44,6 +43,24 @@ async function startDev() {
         stdio: 'inherit',
         env: { ...process.env, SQUEDITOR_PHP_PORT: phpPort, SQUEDITOR_VITE_PORT: vitePort }
     });
+
+    // Watch squeditor.config.js for changes and rebuild dynamic components
+    if (fs.existsSync(configPath)) {
+        let rebuildTimeout;
+        fs.watch(configPath, (eventType) => {
+            if (eventType === 'change') {
+                // Debounce to prevent multiple triggers from IDE saves
+                clearTimeout(rebuildTimeout);
+                rebuildTimeout = setTimeout(() => {
+                    console.log(`\n[Squeditor] 🔄 Config changed. Rebuilding dynamic components...`);
+                    const buildScript = spawn('node', [path.join(fwRoot, 'scripts/build-components.js')], { stdio: 'inherit' });
+                    buildScript.on('close', (code) => {
+                        if (code === 0) console.log(`[Squeditor] ✨ Rebuild complete! (Vite will hot-reload automatically)`);
+                    });
+                }, 300);
+            }
+        });
+    }
 
     process.on('SIGINT', () => {
         php.kill();

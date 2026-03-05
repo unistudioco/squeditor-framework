@@ -154,3 +154,4 @@ Thumbs.db
 *package-lock.json
 *-package/
 *-customer/
+.agent/

@@ -1,6 +1,7 @@
 // src/assets/js/main.js
 import './gsap-init.js';
 import './gsap-advanced.js';
+import './_slider_dynamic.js';
 // SCSS is imported directly in base.php for development (to prevent FOUC) and loaded via <link> in production.
 
 // Remove the dev server FOUC shield

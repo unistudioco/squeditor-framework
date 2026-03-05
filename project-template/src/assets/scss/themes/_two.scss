@@ -1,0 +1,95 @@
+// two.scss
+$sq-color-primary: #21169a;
+$sq-color-secondary: #f5590b;
+$sq-color-accent: #f59e0b;
+$sq-color-muted-text: #272164;
+$sq-color-muted-bg: #e4e2de;
+$sq-color-light: #e4e2de;
+$sq-color-body-bg: #f4f1eb;
+$sq-color-body-text: #201a63;
+$sq-color-heading-text: #272164;
+
+.theme-two {
+    --sq-color-primary: #{$sq-color-primary};
+    --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$sq-color-secondary};
+    --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$sq-color-accent};
+    --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-muted-text: #{$sq-color-muted-text};
+    --sq-color-muted-bg: #{$sq-color-muted-bg};
+    --sq-color-light: #{$sq-color-light};
+    --sq-color-body-bg: #{$sq-color-body-bg};
+    --sq-color-body-text: #{$sq-color-body-text};
+    --sq-color-heading-text: #{$sq-color-heading-text};
+    --sq-font-sans: 'TASA Orbiter', sans-serif;
+    --sq-font-heading: 'TASA Orbiter', sans-serif;
+    --sq-radius-lg: 32px;
+
+    // Page Transitions
+    --sq-page-transition-from: var(--sq-color-secondary);
+    --sq-page-transition-via: var(--sq-color-accent);
+    --sq-page-transition-to: var(--sq-color-accent);
+
+    // Explicit overrides
+    --sq-btn-primary-bg: var(--sq-color-primary);
+    --sq-btn-primary-text: var(--sq-color-primary-contrast);
+    --sq-btn-secondary-bg: var(--sq-color-secondary);
+    --sq-btn-secondary-text: var(--sq-color-secondary-contrast);
+    --sq-btn-accent-bg: var(--sq-color-accent);
+    --sq-btn-accent-text: var(--sq-color-accent-contrast);
+    --sq-form-focus-border: var(--sq-color-secondary);
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--sq-font-heading);
+        letter-spacing: -0.04em;
+    }
+
+    .btn {
+        --sq-btn-radius: 50rem;
+    }
+
+    @apply selection:bg-secondary selection:text-black;
+}
+
+.theme-two.sq-theme-dark {
+    $sq-color-primary-dark: #16239a;
+    $sq-color-secondary-dark: #ffc156;
+    $sq-color-accent-dark: #f59e0b;
+    $sq-color-muted-text: #c4d3d3;
+    $sq-color-muted-bg: #202052;
+    $sq-color-body-bg: #181843;
+    $sq-color-body-text: #c4d3d3;
+    $sq-color-heading-text: #ffffff;
+
+    --sq-color-primary: #{$sq-color-primary-dark};
+    --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$sq-color-secondary-dark};
+    --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$sq-color-accent-dark};
+    --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+
+    --sq-color-primary: #{$sq-color-primary-dark};
+    --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$sq-color-secondary-dark};
+    --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$sq-color-accent-dark};
+    --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+
+    --sq-color-muted-text: #{$sq-color-muted-text};
+    --sq-color-muted-bg: #{$sq-color-muted-bg};
+
+    --sq-color-body-bg: #{$sq-color-body-bg};
+    --sq-color-body-text: #{$sq-color-body-text};
+    --sq-color-heading-text: #{$sq-color-heading-text};
+
+    --sq-sticky-bg: #{$sq-color-muted-bg};
+    --sq-sticky-text: #{$sq-color-body-text};
+
+    --sq-card-bg: #{$sq-color-body-bg};
+}
