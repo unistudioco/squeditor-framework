@@ -1,16 +1,24 @@
 // showcase/squeditor.config.js
 module.exports = {
     framework: '../squeditor-framework',
-    name: '../new-project-name',
+    name: 'new-project-name',
     version: '1.0.0',
     themes: {
         'two': {
             label: 'Two Theme',
             bodyClass: 'theme-two',
             scss: 'src/assets/scss/themes/_two.scss',
-            pages: [],
+            pages: ['404.php', 'slider-test.php'],
             distSubfolder: '',
         }
+    },
+    gsap: {
+        plugins: ['ScrollTrigger', 'SplitText', 'Flip', 'Observer'],
+        initScript: 'src/assets/js/gsap-init.js',
+        advancedScript: 'src/assets/js/gsap-advanced.js',
+    },
+    slider: {
+        library: 'splide', // 'swiper', 'splide', or false
     },
     components: [
         'sticky',
@@ -52,14 +60,6 @@ module.exports = {
         'video',
         'iframe',
     ],
-    gsap: {
-        plugins: ['ScrollTrigger', 'SplitText', 'Flip', 'Observer'],
-        initScript: 'src/assets/js/gsap-init.js',
-        advancedScript: 'src/assets/js/gsap-advanced.js',
-    },
-    slider: {
-        library: 'splide', // 'swiper', 'splide', or false
-    },
     output: {
         css: 'src/assets/css',
         js: 'src/assets/js',
@@ -87,7 +87,7 @@ module.exports = {
         }
     },
     dist: {
-        zipName: '../new-project-name.zip',
+        zipName: 'new-project-name.zip',
         previewPlatform: 'netlify',
     },
 };

@@ -33,9 +33,9 @@ setTimeout(async () => {
         for (const pagePath of theme.pages) {
             try {
                 console.log(`[Squeditor] Fetching ${pagePath} (Theme: ${themeKey})...`);
-                const urlToFetch = `${baseUrl}${pagePath}?theme=${themeKey}&snapshot=1`;
+                const normalizedPagePath = pagePath.startsWith('/') ? pagePath : `/${pagePath}`;
+                const urlToFetch = `${baseUrl.replace(/\/$/, '')}${normalizedPagePath}?theme=${themeKey}&snapshot=1`;
                 const html = await fetchPage(urlToFetch);
-                const rewrittenHtml = rewriteLinks(html);
 
                 // Remove leading slash for local save path
                 let savePath = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath;
@@ -43,6 +43,8 @@ setTimeout(async () => {
                 if (rewriteExtension && savePath.endsWith('.php')) {
                     savePath = savePath.replace(/\.php$/, '.html');
                 }
+
+                const rewrittenHtml = rewriteLinks(html, savePath, theme.distSubfolder);
 
                 const fullPath = path.join(themeDistDir, savePath);
                 fs.mkdirSync(path.dirname(fullPath), { recursive: true });
@@ -60,6 +62,9 @@ setTimeout(async () => {
 function fetchPage(url) {
     return new Promise((resolve, reject) => {
         http.get(url, (res) => {
+            if (res.statusCode < 200 || res.statusCode >= 300) {
+                return reject(new Error(`Status Code: ${res.statusCode}`));
+            }
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => resolve(data));
@@ -67,8 +72,33 @@ function fetchPage(url) {
     });
 }
 
-function rewriteLinks(html) {
-    if (!rewriteExtension) return html;
-    // Replace .php hrefs with .html
-    return html.replace(/href="([^"]*?)\.php([^"]*?)"/g, 'href="$1.html$2"');
+function rewriteLinks(html, savePath, distSubfolder) {
+    let result = html;
+    
+    // Calculate relative path back to dist root
+    // 1. Account for subfolder depth
+    // 2. Account for savePath directory depth
+    const subfolderDepth = distSubfolder ? distSubfolder.split('/').filter(Boolean).length : 0;
+    const savePathDepth = path.dirname(savePath) === '.' ? 0 : path.dirname(savePath).split('/').length;
+    
+    const totalDepth = subfolderDepth + savePathDepth;
+    const prefix = totalDepth > 0 ? '../'.repeat(totalDepth) : '';
+
+    // Rewrite root-relative and purely relative absolute references to depth-adjusted references.
+    // Example: /assets/css/... -> ../assets/css/...
+    // Example: assets/css/... -> ../assets/css/...
+    result = result.replace(/(href|src)=["']\/?([^"']+)["']/g, (match, attr, targetPath) => {
+        // Skip external URLs and hashes
+        if (targetPath.startsWith('http') || targetPath.startsWith('//') || targetPath.startsWith('#')) {
+            return match;
+        }
+        return `${attr}="${prefix}${targetPath}"`;
+    });
+
+    if (rewriteExtension) {
+        // Replace .php hrefs with .html, ensuring they also get prefixed if they were root-relative
+        result = result.replace(/href=["']([^"']*?)\.php([^"']*?)["']/g, 'href="$1.html$2"');
+    }
+    
+    return result;
 }

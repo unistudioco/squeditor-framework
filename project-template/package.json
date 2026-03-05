@@ -1,5 +1,5 @@
 {
-  "name": "../new-project-name",
+  "name": "new-project-name",
   "private": true,
   "scripts": {
     "dev": "node ../squeditor-framework/scripts/dev.js",

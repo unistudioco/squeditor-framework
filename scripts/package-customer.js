@@ -116,6 +116,12 @@ async function walkAndProcessMedia(currentSrc, currentDest, baseDir) {
 async function createCustomerPackage() {
     console.log('[Squeditor] 📦 Assembling Customer Package...');
 
+    if (path.resolve(customerBuildDir) === path.resolve(projectRoot)) {
+        console.error(`[Squeditor] 🚨 CRITICAL ERROR: customerBuildDir resolves to the active project workspace root!`);
+        console.error(`[Squeditor] Aborting immediately to prevent recursive deletion. Please update 'name' in your squeditor.config.js so it does not target the parent folder (e.g., avoid '../folder-name').`);
+        process.exit(1);
+    }
+
     if (fs.existsSync(customerBuildDir)) {
         try {
             execSync(`rm -rf "${customerBuildDir}"`);

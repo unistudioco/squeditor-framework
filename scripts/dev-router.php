@@ -19,5 +19,14 @@ if (preg_match('/\.html$/', $uri)) {
     }
 }
 
-// 3. Let PHP's core handle index.php fallback for directories or 404s
+// 3. If it is an extensionless request, route it to the equivalent PHP file
+if ($uri !== '/' && !pathinfo($uri, PATHINFO_EXTENSION)) {
+    $php_file = $uri . '.php';
+    if (file_exists($doc_root . $php_file)) {
+        require $doc_root . $php_file;
+        return true;
+    }
+}
+
+// 4. Let PHP's core handle index.php fallback for directories or 404s
 return false;

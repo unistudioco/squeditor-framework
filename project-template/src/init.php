@@ -11,8 +11,44 @@ require_once __DIR__ . '/config/site-config.php';
 define('SRC_PATH', __DIR__);
 
 // Global Theme & Schema Detection
-$active_theme  = $_GET['theme']  ?? 'default';
+$active_theme  = $_GET['theme']  ?? null;
 $active_schema = $_GET['schema'] ?? 'light';
+
+if (!$active_theme) {
+    if (file_exists(__DIR__ . '/config/active-themes.php')) {
+        require_once __DIR__ . '/config/active-themes.php';
+        
+        $current_uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $path_only = parse_url($current_uri, PHP_URL_PATH);
+        
+        // Strip trailing slash except for root
+        if ($path_only !== '/' && substr($path_only, -1) === '/') {
+            $path_only = rtrim($path_only, '/');
+        }
+
+        // Normalize .html requests to .php for config matching
+        if (substr($path_only, -5) === '.html') {
+            $path_only = substr($path_only, 0, -5) . '.php';
+        } 
+        // Normalize extensionless requests to .php for config matching
+        elseif ($path_only !== '/' && !pathinfo($path_only, PATHINFO_EXTENSION)) {
+            $path_only .= '.php';
+        }
+
+        // Check exact match, also check matching without leading slash
+        $path_no_slash = ltrim($path_only, '/');
+        
+        if (isset($active_themes[$path_only])) {
+            $active_theme = $active_themes[$path_only];
+        } elseif (isset($active_themes[$path_no_slash])) {
+            $active_theme = $active_themes[$path_no_slash];
+        } else {
+            $active_theme = 'default';
+        }
+    } else {
+        $active_theme = 'default';
+    }
+}
 
 // Add to site config for template access
 $site['theme']  = $active_theme;
