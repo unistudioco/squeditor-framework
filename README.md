@@ -1,9 +1,6 @@
-# ⚡️ Squeditor Framework
-
 **Squeditor Framework** is a high-performance, developer-first framework for building lightning-fast, static websites. It combines the power of **PHP-style templating** with the modern performance of **Tailwind CSS**, the interactivity of **UIKit 3**, and the speed of **Vite**.
 
-> [!IMPORTANT]
-> Squeditor Framework is NOT a WordPress theme framework or a CMS. It is a build-time framework that uses PHP for development and outputs 100% flat, portable HTML/CSS/JS for production and compatible with Squeditor, Elementor, Gutenberg, and other page builders.
+[Full Documentation](https://docs.squeditor.com)
 
 ## 🚀 Key Features
 
@@ -67,7 +64,7 @@ npm run dev
 > Vite will show a link to `http://127.0.0.1:5173/` in your terminal. **Do not use that link.**
 > Instead, always visit the PHP Server address: **`http://127.0.0.1:3001`**. This is because Squeditor Framework uses PHP for template rendering, and Vite only serves the static assets.
 
-### 4. Build for Production
+### 3. Build for Production
 Generate the static `dist/` folder and a distributable ZIP archive:
 ```bash
 npm run build
