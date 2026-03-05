@@ -45,21 +45,16 @@ Every project includes an automatically generated `style-guide.php` page that re
 
 ## 🏁 Getting Started
 
-### 1. Installation
-Clone the repository into your desired workspace folder. This folder will house both the framework and your generated projects:
-```bash
-git clone https://github.com/unistudioco/squeditor-framework.git
-```
+### 1. Scaffold a New Project
+Squeditor includes a robust CLI scaffolding tool. It generates a completely clean, minimalist project instance fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
 
-### 2. Scaffold a New Project
-Squeditor includes a robust CLI scaffolding tool. It generates a completely clean, minimalist `project-template/` instance next to the core framework, fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
-
-To scaffold your new project, run the following command from your workspace root (outside `squeditor-framework`):
+To scaffold your new project, simply run the following command in your terminal:
 ```bash
 npx @squeditor/squeditor-framework your-project-name
 ```
+*(Replace `your-project-name` with your desired folder name).*
 
-### 3. Development
+### 2. Development
 Navigate into your newly generated project folder, install its dependencies, and start the development server:
 ```bash
 cd your-project-name
