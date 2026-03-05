@@ -1,6 +1,6 @@
 {
   "name": "@squeditor/squeditor-framework",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Squeditor Framework is a high-performance, developer-first framework for building lightning-fast, static websites. It combines the power of PHP-style templating with the modern performance of Tailwind CSS, the interactivity of UIKit 3, and the speed of Vite.",
   "main": "index.js",
   "publishConfig": {
