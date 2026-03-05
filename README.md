@@ -54,9 +54,9 @@ git clone https://github.com/unistudioco/squeditor-framework.git
 ### 2. Scaffold a New Project
 Squeditor includes a robust CLI scaffolding tool. It generates a completely clean, minimalist `project-template/` instance next to the core framework, fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
 
-To scaffold your new project as a sibling to the framework directory, run the following command from your workspace root (outside `squeditor-framework`):
+To scaffold your new project, run the following command from your workspace root (outside `squeditor-framework`):
 ```bash
-npx squeditor-framework your-project-name
+npx @squeditor/squeditor-framework your-project-name
 ```
 
 ### 3. Development
