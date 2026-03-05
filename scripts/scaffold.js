@@ -26,17 +26,17 @@ if (fs.existsSync(targetDir)) {
     process.exit(1);
 }
 
-function copyDirectory(src, dest) {
+function copyDirectory(src, dest, ignoreList = []) {
     fs.mkdirSync(dest, { recursive: true });
     const entries = fs.readdirSync(src, { withFileTypes: true });
 
     for (const entry of entries) {
-        if (entry.name === '.DS_Store') continue;
+        if (entry.name === '.DS_Store' || ignoreList.includes(entry.name)) continue;
         const srcPath = path.join(src, entry.name);
         const destPath = path.join(dest, entry.name);
 
         if (entry.isDirectory()) {
-            copyDirectory(srcPath, destPath);
+            copyDirectory(srcPath, destPath, ignoreList);
         } else {
             // Must use copyFileSync to preserve binary data (fonts, images)
             fs.copyFileSync(srcPath, destPath);
@@ -45,6 +45,18 @@ function copyDirectory(src, dest) {
 }
 
 console.log(`[Squeditor] Scaffolding new project: ${projectName}...`);
+
+// 1. Copy the framework core
+const frameworkSourceDir = path.join(__dirname, '..');
+const frameworkTargetDir = path.resolve(process.cwd(), 'squeditor-framework');
+
+if (!fs.existsSync(frameworkTargetDir)) {
+    console.log(`[Squeditor] Installing local framework core at ./squeditor-framework...`);
+    const ignoreCoreList = ['project-template', 'showcase', 'node_modules', '.git', '.github'];
+    copyDirectory(frameworkSourceDir, frameworkTargetDir, ignoreCoreList);
+}
+
+// 2. Copy the project template
 copyDirectory(sourceDir, targetDir);
 
 // Update package.json name
