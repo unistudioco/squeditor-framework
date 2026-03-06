@@ -19,7 +19,8 @@ try {
 const customerBuildDir = path.join(projectRoot, config.name || 'customer-package');
 const distDir = path.join(projectRoot, 'dist');
 const srcDir = path.join(projectRoot, 'src');
-const zipName = config.dist.zipName ? config.dist.zipName.replace('.zip', '-customer.zip') : 'customer-package.zip';
+// Derive ZIP name from config.name directly to avoid double-suffix issues
+const zipName = (config.name || 'customer-package') + '.zip';
 const zipPath = path.join(projectRoot, zipName);
 
 const mediaConfig = config.media || {};
@@ -124,38 +125,47 @@ async function createCustomerPackage() {
 
     if (fs.existsSync(customerBuildDir)) {
         try {
-            execSync(`rm -rf "${customerBuildDir}"`);
+            fs.rmSync(customerBuildDir, { recursive: true, force: true });
         } catch (e) {
-            console.warn(`   - ⚠️  Warning: Could not fully clean ${customerBuildDir}. You may need to run 'sudo rm -rf' on it manually.`);
+            console.warn(`   - ⚠️  Warning: Could not fully clean ${customerBuildDir}. You may need to remove it manually.`);
         }
     }
     if (fs.existsSync(zipPath)) {
         fs.unlinkSync(zipPath);
     }
 
-    fs.mkdirSync(path.join(customerBuildDir, 'src/assets'), { recursive: true });
+    fs.mkdirSync(path.join(customerBuildDir, 'dist/assets'), { recursive: true });
 
-    console.log('   - Copying compiled HTML to src/');
+    console.log('   - Copying compiled HTML to dist/ and src/');
     const distHtmlFiles = fs.readdirSync(distDir).filter(file => file.endsWith('.html'));
+    fs.mkdirSync(path.join(customerBuildDir, 'src'), { recursive: true });
 
     distHtmlFiles.forEach(file => {
         let htmlContent = fs.readFileSync(path.join(distDir, file), 'utf8');
-        htmlContent = htmlContent.replace(
-            /<link rel="stylesheet" href="assets\/css\/main_css\.css">/g,
-            '<link rel="stylesheet" href="assets/scss/main.scss">'
-        );
-        htmlContent = htmlContent.replace(
-            /<script src="assets\/js\/uikit-components\.js"><\/script>/g,
-            '<script type="module" src="assets/js/uikit-components.js"></script>'
-        );
-        fs.writeFileSync(path.join(customerBuildDir, 'src', file), htmlContent);
+        // dist/ gets production HTML referencing compiled CSS
+        fs.writeFileSync(path.join(customerBuildDir, 'dist', file), htmlContent);
+        // src/ gets dev HTML: rewrite CSS refs to raw SCSS for Vite HMR
+        let devHtml = htmlContent;
+        devHtml = devHtml.replace(/href="assets\/css\/main_css\.css"/g, 'href="assets/scss/main.scss"');
+        devHtml = devHtml.replace(/href="assets\/css\/tailwind\.css"/g, 'href="assets/css/tailwind.css"');
+        fs.writeFileSync(path.join(customerBuildDir, 'src', file), devHtml);
     });
 
-    console.log('   - Copying necessary assets to src/assets');
+    console.log('   - Copying necessary developer source files to src/assets');
     fs.mkdirSync(path.join(customerBuildDir, 'src/assets/css'), { recursive: true });
+    // Also copy dist production files
+    fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/css'), { recursive: true });
+    
     fs.copyFileSync(path.join(distDir, 'assets/css/tailwind.css'), path.join(customerBuildDir, 'src/assets/css/tailwind.css'));
+    fs.copyFileSync(path.join(distDir, 'assets/css/tailwind.css'), path.join(customerBuildDir, 'dist/assets/css/tailwind.css'));
+    
     if (fs.existsSync(path.join(distDir, 'assets/css/squeditor-icons.css'))) {
         fs.copyFileSync(path.join(distDir, 'assets/css/squeditor-icons.css'), path.join(customerBuildDir, 'src/assets/css/squeditor-icons.css'));
+        fs.copyFileSync(path.join(distDir, 'assets/css/squeditor-icons.css'), path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
+    }
+    
+    if (fs.existsSync(path.join(distDir, 'assets/css/main_css.css'))) {
+        fs.copyFileSync(path.join(distDir, 'assets/css/main_css.css'), path.join(customerBuildDir, 'dist/assets/css/main_css.css'));
     }
 
     fs.cpSync(path.join(srcDir, 'assets/scss'), path.join(customerBuildDir, 'src/assets/scss'), { recursive: true });
@@ -173,13 +183,19 @@ async function createCustomerPackage() {
     }
 
     fs.mkdirSync(path.join(customerBuildDir, 'src/assets/js'), { recursive: true });
+    fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/js'), { recursive: true });
     fs.copyFileSync(path.join(distDir, 'assets/js/uikit-components.js'), path.join(customerBuildDir, 'src/assets/js/uikit-components.js'));
+    fs.copyFileSync(path.join(distDir, 'assets/js/uikit-components.js'), path.join(customerBuildDir, 'dist/assets/js/uikit-components.js'));
     fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'src/assets/js/main.js'));
+    fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'dist/assets/js/main.js'));
 
     const staticDistPath = path.join(distDir, 'assets/static');
-    const staticCustomerPath = path.join(customerBuildDir, 'src/assets/static');
+    const staticCustomerSourcePath = path.join(customerBuildDir, 'src/assets/static');
+    const staticCustomerDistPath = path.join(customerBuildDir, 'dist/assets/static');
     if (fs.existsSync(staticDistPath)) {
-        await walkAndProcessMedia(staticDistPath, staticCustomerPath, staticDistPath);
+        await walkAndProcessMedia(staticDistPath, staticCustomerSourcePath, staticDistPath);
+        // Also move these final processed media assets directly from src/ back to dist/
+        fs.cpSync(staticCustomerSourcePath, staticCustomerDistPath, { recursive: true });
     }
 
     console.log('   - Generating lean package.json and vite.config.js');
@@ -262,13 +278,16 @@ ${rollupInputs}            },
     const postcssConfig = `module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}`;
     fs.writeFileSync(path.join(customerBuildDir, 'postcss.config.js'), postcssConfig);
 
-    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Source HTML files.\n- \`src/assets/\`: Source files for customization (SCSS, JS, Images).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. Build production assets: \`npm run build\`\n`;
+    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. Edit styles in \`src/assets/scss/main.scss\`\n4. Build production assets to \`dist/\`: \`npm run build\`\n`;
     fs.writeFileSync(path.join(customerBuildDir, 'README.md'), readmeContent);
 
+    // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)
     try {
         console.log('   - Formatting customer HTML files with Prettier...');
-        execSync('npx prettier --write "src/**/*.html" --print-width 10000 --tab-width 4', { cwd: customerBuildDir, stdio: 'ignore' });
-    } catch (e) { }
+        execSync('npx prettier --write "src/**/*.html" "dist/**/*.html" --print-width 10000 --tab-width 4', { cwd: customerBuildDir, stdio: 'ignore' });
+    } catch (e) {
+        console.warn('   - ⚠️  Prettier formatting skipped.');
+    }
 
     console.log(`[Squeditor] 📦 Zipping Customer Package to ${zipName}...`);
     try {

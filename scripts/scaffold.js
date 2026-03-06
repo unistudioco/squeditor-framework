@@ -72,8 +72,8 @@ if (fs.existsSync(pkgJsonPath)) {
 const configPath = path.join(targetDir, 'squeditor.config.js');
 if (fs.existsSync(configPath)) {
     let configContent = fs.readFileSync(configPath, 'utf8');
-    configContent = configContent.replace(/name:\s*['"][^'"]+['"]/, `name: '${projectName}'`);
-    configContent = configContent.replace(/zipName:\s*['"][^'"]+['"]/, `zipName: '${projectName}.zip'`);
+    configContent = configContent.replace(/name:\s*['"][^'"]+['"]/, `name: '${projectName}-customer'`);
+    configContent = configContent.replace(/zipName:\s*['"][^'"]+['"]/, `zipName: '${projectName}-customer.zip'`);
     fs.writeFileSync(configPath, configContent);
 }
 

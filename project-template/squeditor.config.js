@@ -1,7 +1,7 @@
-// showcase/squeditor.config.js
+// squeditor.config.js
 module.exports = {
     framework: '../squeditor-framework',
-    name: 'new-project-name',
+    name: 'customer-bundle',
     version: '1.0.0',
     themes: {
         'two': {
@@ -67,7 +67,7 @@ module.exports = {
     devServer: { port: 3001, root: 'src' },
     snapshot: {
         baseUrl: 'http://127.0.0.1:3001',
-        pages: ['/', '/404.php'],
+        pages: ['*'],
         outputDir: 'dist',
         rewriteExtension: true,
     },
@@ -87,7 +87,7 @@ module.exports = {
         }
     },
     dist: {
-        zipName: 'new-project-name.zip',
+        zipName: 'squeditor-build.zip',
         previewPlatform: 'netlify',
     },
 };

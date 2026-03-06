@@ -20,7 +20,7 @@ try {
     // Explicitly clean up any .DS_Store files that might have been created by the OS
     execSync(`find "${distDir}" -name ".DS_Store" -delete`, { stdio: 'inherit' });
     execSync(`cd "${distDir}" && zip -r -9 "${zipPath}" . -x "*.DS_Store" -x "*/.DS_Store"`, { stdio: 'inherit' });
-    console.log(`[Squeditor] ✅ Customer Ready: ${zipName}`);
+    console.log(`[Squeditor] ✅ Dist ZIP Ready: ${zipName}`);
 } catch (e) {
     console.error(`[Squeditor] ❌ Failed to create ZIP archive using system zip.`, e);
 }

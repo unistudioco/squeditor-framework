@@ -6,6 +6,7 @@ const projectRoot = process.cwd();
 const config = require(path.join(projectRoot, 'squeditor.config.js'));
 const fwRoot = path.resolve(projectRoot, config.framework); // resolves ..
 const manifest = require(path.join(fwRoot, 'uikit-manifest.json'));
+const resolvePages = require('./utils/resolve-pages');
 
 
 const selectedComponents = config.components || [];
@@ -94,8 +95,9 @@ fs.writeFileSync(
 const themePageMapping = {};
 if (config.themes) {
   Object.keys(config.themes).forEach(themeKey => {
-    const pages = config.themes[themeKey].pages || [];
-    pages.forEach(page => {
+    const rawPages = config.themes[themeKey].pages || [];
+    const absolutePages = resolvePages(rawPages, projectRoot);
+    absolutePages.forEach(page => {
       // Clean leading slashes for normalization if desired, but here we just map exact values
       themePageMapping[page] = themeKey;
     });
