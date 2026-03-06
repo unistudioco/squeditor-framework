@@ -19,7 +19,7 @@ if ($layout !== 'default') {
       <div class="w-8 h-8 sq-bg-secondary rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
         <i class="sq-icon-zap"></i>
       </div>
-      <h1 class="font-bold text-xl m-0 tracking-tight hidden md:inline-flex"><?= htmlspecialchars($site['name']) ?></h1>
+      <h1 class="font-bold text-xl m-0 tracking-tight"><?= htmlspecialchars($site['name']) ?></h1>
     </a>
 
     <!-- Desktop Nav (Centered) -->
@@ -30,11 +30,11 @@ if ($layout !== 'default') {
     <!-- Right Side / CTA -->
     <div class="sq--header--cta flex items-center gap-6">
        <a href="#" class="sq-nav-link text-base font-medium text-zinc-900 dark:text-white !text-opacity-70 hover:text-secondary hover:!text-opacity-100 transition-colors hidden md:inline-block">Log in</a>
-       <a href="https://squeditor.com/" class="btn btn-secondary">Try Squeditor</a>
+       <a href="https://squeditor.com/" class="btn btn-secondary !hidden md:!inline-flex">Try Squeditor</a>
       
       <!-- Mobile Toggle -->
-      <button class="sq--header--mobile--toggle md:hidden" data-uk-toggle="target: #sq_mobile_offcanvas" type="button" aria-label="Menu">
-        <span data-uk-icon="icon: menu; ratio: 1"></span>
+      <button class="sq--header--mobile--toggle md:hidden" data-gsap-toggle="#sq_offcanvas_creative" type="button" aria-label="Menu">
+        <span data-uk-icon="icon: menu; ratio: 1.5"></span>
       </button>
     </div>
   </div>
@@ -48,18 +48,18 @@ if ($layout !== 'default') {
 </div>
 
 <!-- Creative Offcanvas -->
-<div id="sq-offcanvas-creative" class="sq-offcanvas-creative fixed inset-0 z-[9999] pointer-events-none text-zinc-600 shadow-2xl" data-gsap-timeline="{paused: true}">
+<div id="sq_offcanvas_creative" class="sq-offcanvas-creative fixed inset-0 z-[9999] pointer-events-none text-zinc-600 shadow-2xl" style="visibility: hidden" data-gsap-timeline="{paused: true}">
 
     <!-- Backdrop Overlay -->
-    <div class="sq-offcanvas-creative--close fixed inset-0 z-10 pointer-events-auto bg-black/50 backdrop-blur-md" data-gsap-reverse="#sq-offcanvas-creative" data-gsap="position: '<'; from: {autoAlpha: 0, duration: 0.25, ease: 'power3.out'}"></div>
+    <div class="sq-offcanvas-creative--close fixed inset-0 z-10 pointer-events-auto bg-black/50 backdrop-blur-md" data-gsap-reverse="#sq_offcanvas_creative" data-gsap="position: '<'; from: {autoAlpha: 0, duration: 0.25, ease: 'power3.out'}"></div>
     
     <!-- Offcanvas Background Panel -->
-    <div class="absolute top-0 left-0 w-full md:w-1/3 h-full bg-white shadow-2xl flex flex-col items-start justify-start z-20 pointer-events-auto" data-gsap="from: {xPercent: -100, duration: 0.6, ease: 'power4.inOut'}" data-sq-cursor-color="#4f46e5">
+    <div class="absolute top-0 left-0 w-full md:w-1/3 h-full bg-white shadow-2xl flex flex-col items-start justify-start z-20 pointer-events-auto" data-gsap="position: '-=0.3'; from: {xPercent: -100, duration: 0.6, ease: 'power4.inOut'}" data-sq-cursor-color="#4f46e5">
         
         <!-- Header -->
         <div class="flex items-center justify-between w-full p-6 lg:p-12" data-gsap="from: {yPercent: -20, opacity: 0, duration: 0.4, ease: 'power3.out'}">
             <a href="#" class="sq-logo text-xl font-bold text-zinc-900" data-sq-cursor-stick>Squeditor</a>
-            <button data-gsap-reverse="#sq-offcanvas-creative" class="opacity-50 hover:opacity-100 transition-opacity" data-sq-cursor-stick>
+            <button data-gsap-reverse="#sq_offcanvas_creative" class="opacity-50 hover:opacity-100 transition-opacity" data-sq-cursor-stick>
                 <span data-uk-icon="icon: close; ratio: 1.5"></span>
             </button>
         </div>

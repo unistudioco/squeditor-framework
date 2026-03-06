@@ -478,6 +478,19 @@ function initTimelines() {
         }
 
         // Initialize timeline with data-gsap-timeline parameters (e.g. {delay: 1, repeat: -1, yoyo: true})
+        // OPT-IN FOUC protection: if the developer set style="visibility: hidden" on the element,
+        // GSAP will manage show/hide. We only use onReverseComplete (reliable) and handle
+        // the "show" part directly in control handlers for bulletproof timing.
+        const isInitiallyHidden = timelineEl.style.visibility === 'hidden';
+        if (isInitiallyHidden) {
+            timelineEl._sqHidden = true; // Flag for control handlers
+            const originalOnReverseComplete = tlConfig.onReverseComplete;
+            tlConfig.onReverseComplete = function() {
+                timelineEl.style.visibility = 'hidden';
+                if (originalOnReverseComplete) originalOnReverseComplete.call(this);
+            };
+        }
+
         const tl = gsap.timeline(tlConfig);
         timelineEl._sqTimeline = tl; // Bind to DOM node so external buttons can trigger it.
 
@@ -548,7 +561,21 @@ function initTimelineControls() {
                     const tl = t._sqTimeline;
                     if (tl) {
                         if (action === 'toggle') {
-                            tl.reversed() ? tl.play() : tl.reverse();
+                            if (t._sqOpen) {
+                                tl.reverse();
+                                t._sqOpen = false;
+                            } else {
+                                if (t._sqHidden) t.style.visibility = 'visible';
+                                tl.play();
+                                t._sqOpen = true;
+                            }
+                        } else if (action === 'play') {
+                            if (t._sqHidden) t.style.visibility = 'visible';
+                            t._sqOpen = true;
+                            tl.play();
+                        } else if (action === 'reverse') {
+                            t._sqOpen = false;
+                            tl.reverse();
                         } else {
                             tl[action]();
                         }

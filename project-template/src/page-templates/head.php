@@ -13,6 +13,12 @@ if (!$is_snapshot) {
         fclose($fp);
     }
 }
+
+// Load slider config for conditional CSS loading
+$active_slider = false;
+if (file_exists(__DIR__ . '/../config/active-slider.php')) {
+    require_once __DIR__ . '/../config/active-slider.php';
+}
 ?>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -36,7 +42,7 @@ if (!$is_snapshot) {
   <script type="module" src="<?= $vite_server ?>/@vite/client"></script>
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/tailwind.css">
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/squeditor-icons.css">
-  <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/slider.min.css">
+  <?php if ($active_slider): ?><link rel="stylesheet" href="<?= $vite_server ?>/assets/css/slider.min.css"><?php endif; ?>
   <script type="module" src="<?= $vite_server ?>/assets/scss/main.scss"></script>
   <style>html.js-fouc { opacity: 0; transition: opacity 0.15s ease-out; }</style>
   <script>document.documentElement.classList.add('js-fouc');</script>
@@ -44,6 +50,6 @@ if (!$is_snapshot) {
   <!-- Production Static Assets -->
   <link rel="stylesheet" href="assets/css/squeditor-icons.css">
   <link rel="stylesheet" href="assets/css/tailwind.css">
-  <link rel="stylesheet" href="assets/css/slider.min.css">
+  <?php if ($active_slider): ?><link rel="stylesheet" href="assets/css/slider.min.css"><?php endif; ?>
   <link rel="stylesheet" href="assets/css/main.min.css">
 <?php endif; ?>
