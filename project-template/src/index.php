@@ -30,17 +30,17 @@ ob_start();
 ?>
 
     <section class="py-32 md:py-48 flex items-center justify-center bg-gradient-to-b from-zinc-100 to-transparent" data-uk-height-viewport="offset-top: true">
-        <div class="max-w-4xl mx-auto px-6 text-center">
+        <div class="max-w-4xl mx-auto px-6 text-center" data-gsap-timeline="{defaults: {duration: 1.2, ease: 'power4.out', delay: 0.8}}">
             
-            <h2 class="text-6xl font-bold tracking-tight mb-8 lg:px-8">
-                Start building<span class="opacity-30"> creative websites</span> with Squeditor
+            <h2 class="text-6xl font-bold tracking-tight mb-8 lg:px-8" data-gsap="from: {y: 60, opacity: 0, filter: 'blur(20px)'}">
+                Start building <span class="bg-gradient-to-r from-zinc-500 via-zinc-400 to-zinc-200 text-transparent bg-clip-text">creative websites</span> with Squeditor
             </h2>
             
-            <p class="text-xl text-muted max-w-2xl mx-auto font-light leading-relaxed mb-12">
+            <p class="text-xl text-muted max-w-2xl mx-auto font-light leading-relaxed mb-12" data-gsap="position: '<-0.5'; from: {y: 40, opacity: 0, filter: 'blur(10px)'}">
                You can now begin creating interactive GSAP experiences, modifying the UIKit configuration, and adding content to your template files.
             </p>
 
-            <div class="flex items-center justify-center gap-4">
+            <div class="flex items-center justify-center gap-4" data-gsap="position: '<-0.5'; from: {y: 20, opacity: 0, filter: 'blur(5px)'}">
                 <a href="https://squeditor.com/" class="btn btn-lg btn-secondary !px-8 !py-3 !rounded-full text-white font-medium hover:scale-105 transition-transform">
                     Try Squeditor
                 </a>

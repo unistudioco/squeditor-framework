@@ -11,13 +11,13 @@ if ($layout !== 'default') {
 }
 ?>
 <!-- Site Header -->
-<header id="sq_header" class="sq--header absolute w-full top-0 z-[1000]" data-uk-sticky="top: 80; cls-active: sq-header--sticky; animation: uk-animation-slide-top">
+<header id="sq_header" class="sq--header absolute w-full top-0 z-[1000] bg-white dark:bg-zinc-900" data-gsap="from: {y: -80, opacity: 0}; to: {y: 0, opacity: 1}; duration: 1.2; ease: expo.inOut;">
   <div class="sq--header--inner max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
     <!-- Logo -->
     <a href="index.html" class="sq--logo flex items-center gap-2 group">
       <div class="w-8 h-8 sq-bg-secondary rounded-lg flex items-center justify-center transition-transform group-hover:scale-110">
-        <i class="sq-icon-zap"></i>
+        <i class="sq-icon-waves"></i>
       </div>
       <h1 class="font-bold text-xl m-0 tracking-tight"><?= htmlspecialchars($site['name']) ?></h1>
     </a>
