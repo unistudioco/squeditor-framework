@@ -19,7 +19,10 @@ module.exports = function resolvePages(pagesConfig, projectRoot) {
         const srcDir = path.join(projectRoot, 'src');
         if (!fs.existsSync(srcDir)) return [];
         
-        const allFiles = fs.readdirSync(srcDir).filter(f => f.endsWith('.php'));
+        // Exclude known non-page PHP files that should never be snapshotted
+        const NON_PAGE_FILES = ['init.php'];
+        const allFiles = fs.readdirSync(srcDir)
+            .filter(f => f.endsWith('.php') && !NON_PAGE_FILES.includes(f));
         
         // Micromatch expects naked filenames logically. 
         // We ensure config patterns like '/' become 'index.php' for matching, 

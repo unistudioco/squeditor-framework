@@ -23,6 +23,18 @@ async function startDev() {
             fwRoot = config.framework;
         }
     }
+
+    // Run build-components.js BEFORE starting servers to ensure
+    // active-themes.php, _uikit_dynamic.scss, _slider_dynamic.js etc. exist on first request
+    const buildComponentsPath = path.join(fwRoot, 'scripts/build-components.js');
+    console.log('[Squeditor] 🔧 Building dynamic components...');
+    const { execSync } = require('child_process');
+    try {
+        execSync(`node "${buildComponentsPath}"`, { stdio: 'inherit', cwd: projectRoot });
+    } catch (e) {
+        console.error('[Squeditor] ❌ Failed to build dynamic components:', e.message);
+    }
+
     const devRouterPath = path.join(fwRoot, 'scripts/dev-router.php');
 
     // Start PHP Server

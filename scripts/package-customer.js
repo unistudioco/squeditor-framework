@@ -146,7 +146,7 @@ async function createCustomerPackage() {
         fs.writeFileSync(path.join(customerBuildDir, 'dist', file), htmlContent);
         // src/ gets dev HTML: rewrite CSS refs to raw SCSS for Vite HMR
         let devHtml = htmlContent;
-        devHtml = devHtml.replace(/href="assets\/css\/main_css\.css"/g, 'href="assets/scss/main.scss"');
+        devHtml = devHtml.replace(/href="assets\/css\/main\.min\.css"/g, 'href="assets/scss/main.scss"');
         devHtml = devHtml.replace(/href="assets\/css\/tailwind\.css"/g, 'href="assets/css/tailwind.css"');
         fs.writeFileSync(path.join(customerBuildDir, 'src', file), devHtml);
     });
@@ -164,8 +164,14 @@ async function createCustomerPackage() {
         fs.copyFileSync(path.join(distDir, 'assets/css/squeditor-icons.css'), path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
     }
     
-    if (fs.existsSync(path.join(distDir, 'assets/css/main_css.css'))) {
-        fs.copyFileSync(path.join(distDir, 'assets/css/main_css.css'), path.join(customerBuildDir, 'dist/assets/css/main_css.css'));
+    if (fs.existsSync(path.join(distDir, 'assets/css/main.min.css'))) {
+        fs.copyFileSync(path.join(distDir, 'assets/css/main.min.css'), path.join(customerBuildDir, 'dist/assets/css/main.min.css'));
+    }
+
+    // slider.min.css contains the slider library CSS (Splide/Swiper)
+    if (fs.existsSync(path.join(distDir, 'assets/css/slider.min.css'))) {
+        fs.copyFileSync(path.join(distDir, 'assets/css/slider.min.css'), path.join(customerBuildDir, 'src/assets/css/slider.min.css'));
+        fs.copyFileSync(path.join(distDir, 'assets/css/slider.min.css'), path.join(customerBuildDir, 'dist/assets/css/slider.min.css'));
     }
 
     fs.cpSync(path.join(srcDir, 'assets/scss'), path.join(customerBuildDir, 'src/assets/scss'), { recursive: true });

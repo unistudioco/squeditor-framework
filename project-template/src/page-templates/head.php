@@ -36,6 +36,7 @@ if (!$is_snapshot) {
   <script type="module" src="<?= $vite_server ?>/@vite/client"></script>
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/tailwind.css">
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/squeditor-icons.css">
+  <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/slider.min.css">
   <script type="module" src="<?= $vite_server ?>/assets/scss/main.scss"></script>
   <style>html.js-fouc { opacity: 0; transition: opacity 0.15s ease-out; }</style>
   <script>document.documentElement.classList.add('js-fouc');</script>
@@ -43,5 +44,6 @@ if (!$is_snapshot) {
   <!-- Production Static Assets -->
   <link rel="stylesheet" href="assets/css/squeditor-icons.css">
   <link rel="stylesheet" href="assets/css/tailwind.css">
-  <link rel="stylesheet" href="assets/css/main_css.css">
+  <link rel="stylesheet" href="assets/css/slider.min.css">
+  <link rel="stylesheet" href="assets/css/main.min.css">
 <?php endif; ?>

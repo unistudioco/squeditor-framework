@@ -1,12 +1,7 @@
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay, Parallax, Thumbs, EffectFade, FreeMode } from 'swiper/modules';
 
-// Import Swiper styling
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
-import 'swiper/css/free-mode';
+// Swiper CSS is handled separately by build-components.js → slider.min.css
 
 function splitTopLevel(str, delimiters = [';', ',']) {
     const result = [];

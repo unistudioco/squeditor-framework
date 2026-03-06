@@ -1,8 +1,6 @@
 import Splide, { EventInterface } from '@splidejs/splide';
 
-// Import Splide default theme styling natively
-// Vite will automatically tree-shake and bundle this when Splide is enabled in squeditor.config.js
-import '@splidejs/splide/css';
+// Splide CSS is handled separately by build-components.js → slider.min.css
 
 /**
  * Creates a generic Slide Effect Transition component for Splide,
