@@ -14,7 +14,24 @@ if (!projectName) {
 let destIndex = args.indexOf('--dest');
 let destPath = destIndex !== -1 ? args[destIndex + 1] : projectName;
 const sourceDir = path.join(__dirname, '..', 'project-template');
-const targetDir = path.resolve(process.cwd(), destPath);
+
+// Check if running directly inside the cloned framework repository
+let isInsideRepo = false;
+try {
+    const pkgPath = path.join(process.cwd(), 'package.json');
+    if (fs.existsSync(pkgPath)) {
+        const pkg = require(pkgPath);
+        if (pkg.name === '@squeditor/squeditor-framework') {
+            isInsideRepo = true;
+        }
+    }
+} catch (e) {}
+
+// If running inside the repo, scaffold as a sibling (../destPath). 
+// Otherwise scaffold in the current directory.
+const targetDir = isInsideRepo 
+    ? path.resolve(process.cwd(), '..', destPath) 
+    : path.resolve(process.cwd(), destPath);
 
 if (!fs.existsSync(sourceDir)) {
     console.error(`Source template directory does not exist: ${sourceDir}`);
@@ -47,14 +64,18 @@ function copyDirectory(src, dest, ignoreList = []) {
 console.log(`[Squeditor] Scaffolding new project: ${projectName}...`);
 
 // 1. Copy the framework core
-const frameworkSourceDir = path.join(__dirname, '..');
-const frameworkTargetDir = path.resolve(process.cwd(), 'squeditor-framework');
+if (!isInsideRepo) {
+    const frameworkSourceDir = path.join(__dirname, '..');
+    const frameworkTargetDir = path.resolve(process.cwd(), 'squeditor-framework');
 
-if (!fs.existsSync(frameworkTargetDir)) {
-    console.log(`[Squeditor] Installing local framework core at ./squeditor-framework...`);
-    // Pass the name of the target directory to the ignore list to prevent infinite loop
-    const ignoreCoreList = ['project-template', 'showcase', 'node_modules', '.git', '.github', 'squeditor-framework'];
-    copyDirectory(frameworkSourceDir, frameworkTargetDir, ignoreCoreList);
+    if (!fs.existsSync(frameworkTargetDir)) {
+        console.log(`[Squeditor] Installing local framework core at ./squeditor-framework...`);
+        // Pass the name of the target directory to the ignore list to prevent infinite loop
+        const ignoreCoreList = ['project-template', 'showcase', 'node_modules', '.git', '.github', 'squeditor-framework'];
+        copyDirectory(frameworkSourceDir, frameworkTargetDir, ignoreCoreList);
+    }
+} else {
+    console.log(`[Squeditor] Running inside framework repo. Skipping core installation (using repo).`);
 }
 
 // 2. Copy the project template

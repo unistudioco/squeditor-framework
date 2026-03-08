@@ -4,12 +4,12 @@ We implement AI Agents skills to help you build your website easily in minutes. 
 
 ### Showcase and Demo
 
-[Main Demo](https://squeditor.com/showcase/main-demo/)
-[All Components](https://squeditor.com/showcase/all-components/)
-[Style Guide](https://squeditor.com/showcase/style-guide/)
+[Main Demo](https://squeditor.com/showcase/main-demo/)  |  
+[All Components](https://squeditor.com/showcase/all-components/)  |  
+[Style Guide](https://squeditor.com/showcase/style-guide/)  |  
 [GSAP Animations](https://squeditor.com/showcase/gsap-animations/)
 
-[Full Documentation](https://docs.squeditor.com)
+[Full Documentation](https://docs.squeditor.com/framework/getting-started/introduction)
 
 ### Key Features
 

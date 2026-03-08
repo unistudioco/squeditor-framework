@@ -41,10 +41,10 @@ ob_start();
             </p>
 
             <div class="flex items-center justify-center gap-4" data-gsap="position: '<-0.5'; from: {y: 20, opacity: 0, filter: 'blur(5px)'}">
-                <a href="https://squeditor.com/" class="btn btn-lg btn-secondary !px-8 !py-3 !rounded-full text-white font-medium hover:scale-105 transition-transform">
+                <a href="https://squeditor.com/" class="btn btn-lg btn-secondary hover:scale-105 transition-transform">
                     Try Squeditor
                 </a>
-                <a href="https://docs.squeditor.com/" class="btn btn-lg !px-8 !py-3 !rounded-full text-white font-medium !border !border-1 !border-solid !border-zinc-200 hover:scale-105 transition-transform">
+                <a href="https://docs.squeditor.com/" class="btn btn-lg !border !border-1 !border-solid !border-zinc-200 hover:scale-105 transition-transform">
                     View Docs
                 </a>
             </div>

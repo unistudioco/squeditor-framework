@@ -1,16 +1,17 @@
 // _tokens.scss — Design tokens as CSS custom properties
 
 // 1. Define SASS Variables for calculations
-$color-primary: #1c2020 !default;
-$color-primary-dark: #ffffff !default;
-$color-secondary: #038677 !default;
-$color-secondary-dark: #d5f37b !default;
-$color-accent: #F0FF44 !default;
-$color-accent-dark: #F0FF44 !default;
+$color-primary: #107466 !default;
+$color-primary-dark: #F0FF44 !default;
+$color-secondary: #1c2020 !default;
+$color-secondary-dark: #fef1e7 !default;
+$color-accent: #e5fdc5 !default;
+$color-accent-dark: #e5fdc5 !default;
 $color-white: #FFFFFF !default;
-$color-muted-text: #777f7f !default;
-$color-muted-bg: #f8f8f8 !default;
+$color-muted-text: #707070 !default;
+$color-muted-bg: #fef1e7 !default;
 $color-light: #f8f8f8 !default;
+$color-dark: #19191b !default;
 $color-body-bg: #FFFFFF !default;
 $color-body-text: #19191b !default;
 $color-heading-text: #19191b !default;
@@ -28,6 +29,7 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     --sq-color-muted-text: #{$color-muted-text};
     --sq-color-muted-bg: #{$color-muted-bg};
     --sq-color-light: #{$color-light};
+    --sq-color-dark: #{$color-dark};
     --sq-color-body-bg: #{$color-body-bg};
     --sq-color-body-text: #{$color-body-text};
     --sq-color-heading-text: #{$color-heading-text};
@@ -76,12 +78,12 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     // --- Component Tokens ---
 
     // Buttons
-    --sq-btn-height: 2.25rem; // h-9
+    --sq-btn-height: 2.75rem;
     --sq-btn-bg: transparent;
     --sq-btn-text: var(--sq-color-body-text);
-    --sq-btn-radius: var(--sq-radius-lg);
-    --sq-btn-font-size: 1rem; // text-base
-    --sq-btn-font-weight: 500;
+    --sq-btn-radius: var(--sq-radius-md);
+    --sq-btn-font-size: 1rem;
+    --sq-btn-font-weight: 600;
 
     --sq-btn-default-bg: var(--sq-color-light);
     --sq-btn-default-text: var(--sq-color-muted-text);
@@ -113,7 +115,7 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     // Dropdown
     --sq-dropdown-width: 300px;
     --sq-dropdown-padding: 2rem;
-    --sq-dropdown-bg: var(--sq-color-white);
+    --sq-dropdown-bg: var(--sq-color-muted-bg);
     --sq-dropdown-text: var(--sq-color-body-text);
 
     // Accordion
@@ -226,4 +228,7 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     --sq-card-bg: #19191b;
     --sq-card-shadow: none;
     --sq-card-shadow-hover: none;
+
+    // Dropdown
+    --sq-dropdown-bg: var(--sq-color-muted-bg);
 }

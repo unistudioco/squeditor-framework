@@ -3,7 +3,7 @@
 $heading = $heading ?? 'Subscribe to our newsletter';
 $subheading = $subheading ?? 'Get the latest updates and news from our team.';
 ?>
-<section class="py-20 bg-zinc-50 dark:bg-zinc-800 dark:bg-opacity-40">
+<section class="py-20 bg-muted dark:bg-opacity-40">
   <div class="max-w-7xl mx-auto px-6 flex flex-col items-center justify-between gap-8">
     <div class="mb-8 md:mb-0 md:w-1/2">
       <h2 class="text-4xl font-bold text-center m-0"><?= htmlspecialchars($heading) ?></h2>

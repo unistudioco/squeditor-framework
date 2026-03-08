@@ -7,7 +7,7 @@ $button_url = $button_url ?? '#';
 $secondary_button_text = $secondary_button_text ?? '';
 $hint_text = $hint_text ?? '';
 ?>
-<section class="py-32 text-center border-t border-zinc-300 border-opacity-30 dark:border-opacity-5">
+<section class="sq-cta-banner py-16 md:py-24 lg:py-32 text-center border-t border-zinc-300 border-opacity-30 dark:border-opacity-5">
   <div class="max-w-4xl mx-auto px-6">
     <h2 class="text-4xl md:text-5xl font-bold mb-4 tracking-tighter">
         <?= $heading ?>

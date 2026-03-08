@@ -11,8 +11,8 @@ if ($layout !== 'default') {
 }
 ?>
 <!-- Site Header -->
-<header id="sq_header" class="sq--header absolute w-full top-0 z-[1000] bg-white dark:bg-zinc-900" data-gsap="from: {y: -80, opacity: 0}; to: {y: 0, opacity: 1}; duration: 1.2; ease: expo.inOut;">
-  <div class="sq--header--inner max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+<header id="sq_header" class="sq-header absolute w-full top-0 z-[1000]" data-gsap="from: {y: -80, opacity: 0}; to: {y: 0, opacity: 1}; duration: 1.2; ease: expo.inOut;">
+  <div class="sq-header-inner max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
 
     <!-- Logo -->
     <a href="index.html" class="sq--logo flex items-center gap-2 group">
@@ -23,17 +23,17 @@ if ($layout !== 'default') {
     </a>
 
     <!-- Desktop Nav (Centered) -->
-    <div class="sq--header--nav hidden md:flex items-center absolute left-1/2 -translate-x-1/2">
+    <div class="sq-header-nav items-center absolute left-1/2 -translate-x-1/2 hidden lg:flex">
       <?php get_template_part('nav'); ?>
     </div>
 
     <!-- Right Side / CTA -->
-    <div class="sq--header--cta flex items-center gap-6">
+    <div class="sq-header-cta flex items-center gap-6">
        <a href="#" class="sq-nav-link text-base font-medium text-zinc-900 dark:text-white !text-opacity-70 hover:text-secondary hover:!text-opacity-100 transition-colors hidden md:inline-block">Log in</a>
        <a href="https://squeditor.com/" class="btn btn-secondary !hidden md:!inline-flex">Try Squeditor</a>
       
       <!-- Mobile Toggle -->
-      <button class="sq--header--mobile--toggle md:hidden" data-gsap-toggle="#sq_offcanvas_creative" type="button" aria-label="Menu">
+      <button class="sq-header-mobile-toggle md:hidden" data-gsap-toggle="#sq_offcanvas_creative" type="button" aria-label="Menu">
         <span data-uk-icon="icon: menu; ratio: 1.5"></span>
       </button>
     </div>

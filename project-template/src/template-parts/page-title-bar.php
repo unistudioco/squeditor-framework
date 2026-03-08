@@ -2,7 +2,7 @@
 // src/template-parts/page-title-bar.php
 $title = $title ?? 'Page Title';
 $subtitle = $subtitle ?? '';
-$class = $class ?? 'py-20 text-center bg-zinc-50 dark:bg-zinc-800 dark:bg-opacity-40';
+$class = $class ?? 'py-20 text-center bg-muted dark:bg-opacity-40';
 ?>
 <div class="<?= htmlspecialchars($class) ?>">
   <div class="max-w-7xl mx-auto px-6">

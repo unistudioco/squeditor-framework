@@ -62,13 +62,13 @@ $processed_heading = str_replace(
               </h2>
 
               <!-- Subheading -->
-              <p class="text-lg md:text-xl text-muted mb-10 max-w-md leading-relaxed" 
+              <p class="text-lg md:text-xl text-muted mb-10 max-w-md" 
                   data-gsap="from: {opacity: 0, y: 20}; duration: 0.8; delay: 0.4">
                   <?= htmlspecialchars($args['subheading']) ?>
               </p>
 
               <!-- CTA Button -->
-              <div data-gsap="from: {opacity: 0, y: 16}; duration: 0.6; delay: 0.7" class="self-start mb-16">
+              <div data-gsap="from: {opacity: 0, y: 16}; duration: 0.6; delay: 0.7" class="self-start mb-8 lg:mb-16">
                   <a href="<?= htmlspecialchars($args['cta_url']) ?>" class="btn btn-secondary min-h-[48px] !px-8 !py-4 !text-base !shadow-lg !shadow-sq-primary/30 flex items-center gap-2 transition-transform hover:scale-105">
                       <?= htmlspecialchars($args['cta_label']) ?>
                       <i class="sq-icon sq-icon-arrow-up-right text-lg leading-none mt-0.5"></i>
@@ -96,8 +96,8 @@ $processed_heading = str_replace(
           <div class="relative h-[400px] md:h-[700px]">
               
               <!-- Image Wrapper -->
-              <div class="h-full rounded-[2rem] overflow-hidden" data-gsap="from: {clipPath: 'inset(0 0 100% 0)'}; duration: 2; ease: expo.inOut;">
-                  <img src="<?= htmlspecialchars($args['image_src']) ?>" alt="<?= htmlspecialchars($args['image_alt']) ?>" class="w-full h-full object-cover rounded-[2rem]">
+              <div class="h-full rounded-3xl overflow-hidden" data-gsap="from: {clipPath: 'inset(0 0 100% 0)'}; duration: 2; ease: expo.inOut;">
+                  <img src="<?= htmlspecialchars($args['image_src']) ?>" alt="<?= htmlspecialchars($args['image_alt']) ?>" class="w-full h-full object-cover">
               </div>
 
               <!-- Floating Services Container -->

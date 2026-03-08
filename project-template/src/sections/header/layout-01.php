@@ -4,7 +4,7 @@
 $isDark = $isDark ?? false;
 $isFloat = $isFloat ?? false;
 
-$headerClasses = 'sq--header w-full z-[1000]';
+$headerClasses = 'sq-header w-full z-[1000]';
 if ($isFloat) $headerClasses .= ' absolute top-0';
 if ($isDark) $headerClasses .= ' dark-mode text-white bg-zinc-900';
 else $headerClasses .= ' bg-white border-b';

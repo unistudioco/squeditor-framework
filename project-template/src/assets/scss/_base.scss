@@ -24,7 +24,8 @@ h6,
     font-family: var(--sq-font-heading);
     color: var(--sq-color-heading-text);
     font-weight: 600;
-    line-height: 1.2;
+    line-height: var(--sq-heading-line-height, 1.2);
+    letter-spacing: var(--sq-heading-letter-spacing, normal);
 }
 
 h1 {
@@ -75,7 +76,8 @@ h6 {
 // Only apply paragraph and list styles if the author didn't supply their own layout classes
 p:not([class]) {
     margin-bottom: 1rem;
-    line-height: 1.6;
+    line-height: var(--sq-body-line-height, 1.6);
+    letter-spacing: var(--sq-body-letter-spacing, normal);
 }
 
 ul:not([class]),

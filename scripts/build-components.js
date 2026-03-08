@@ -77,8 +77,7 @@ scssPaths.forEach(f => {
 fs.writeFileSync(path.join(outputJsDir, 'uikit-components.js'), jsBundle);
 fs.writeFileSync(path.join(outputScssDir, '_uikit_dynamic.scss'), scssImports);
 
-console.log('[Squeditor] ✅ uikit-components.js and _uikit_dynamic.scss built successfully.');
-console.log(`   Components included: _core, ${selectedComponents.join(', ')}`);
+console.log('[Squeditor] ✅ UIkit3 components built successfully.');
 
 // Generate src/config/active-components.php for the style-guide page
 const phpConfigDir = path.join(projectRoot, 'src/config');
@@ -128,7 +127,7 @@ if (fs.existsSync(mainScssPath) && config.themes) {
   // Ensure exactly one trailing newline
   mainScss = mainScss.trim() + '\n' + themeImports;
   fs.writeFileSync(mainScssPath, mainScss);
-  console.log(`[Squeditor] 🎨 Injected themes: ${Object.keys(config.themes).join(', ')}`);
+  console.log(`[Squeditor] 🎨 Ready themes: ${Object.keys(config.themes).join(', ')}`);
 }
 
 // Generate Dynamic Slider Config Import
@@ -141,7 +140,7 @@ if (sliderConfig.library === 'swiper') {
     sliderImportCode += 'import \'./modules/splide-init.js\';\n';
 }
 fs.writeFileSync(dynamicSliderPath, sliderImportCode);
-console.log(`[Squeditor] 🎠 Injected slider library: ${sliderConfig.library || 'none'}`);
+console.log(`[Squeditor] 🎠 Selected slider library: ${sliderConfig.library || 'none'}`);
 
 // Copy slider library CSS to src/assets/css/slider.min.css
 // This keeps the CSS separate from main.js and gives it a clear, descriptive filename
@@ -150,7 +149,6 @@ if (sliderConfig.library === 'splide') {
     const splideCssPath = path.join(projectRoot, 'node_modules/@splidejs/splide/dist/css/splide.min.css');
     if (fs.existsSync(splideCssPath)) {
         fs.copyFileSync(splideCssPath, sliderCssDest);
-        console.log('[Squeditor] 📎 Copied Splide CSS → src/assets/css/slider.min.css');
     } else {
         console.warn('[Squeditor] ⚠️ Splide CSS not found at expected path.');
         fs.writeFileSync(sliderCssDest, '/* Splide CSS not found */\n');
@@ -172,7 +170,6 @@ if (sliderConfig.library === 'splide') {
         }
     }
     fs.writeFileSync(sliderCssDest, combinedCss);
-    console.log('[Squeditor] 📎 Copied Swiper CSS → src/assets/css/slider.min.css');
 } else {
     // No slider configured — write an empty placeholder so head.php link doesn't 404
     fs.writeFileSync(sliderCssDest, '/* No slider library configured */\n');

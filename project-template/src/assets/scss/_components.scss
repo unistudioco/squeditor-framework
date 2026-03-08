@@ -115,7 +115,7 @@
     }
 }
 
-.sq--header {
+.sq-header {
     z-index: var(--sq-z-sticky);
 
     &--sticky {
@@ -133,7 +133,6 @@
 // ---------------------------------------------------------
 // Container + Expand Container
 // ---------------------------------------------------------
-@layer components {
     .container {
         width: 100%;
 
@@ -168,13 +167,9 @@
         overflow: visible;
     }
 
-}
-
 // ---------------------------------------------------------
 // Form icon group
 // ---------------------------------------------------------
-@layer components {
-
   /* Base */
   .form-icon-group {
     position: relative;
@@ -227,8 +222,6 @@
   [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-lg { padding-right: 1rem !important; padding-left: 3.25rem !important; }
   [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-sm { padding-right: 1rem !important; padding-left: 2.25rem !important; }
   [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-xs { padding-right: 1rem !important; padding-left: 1.75rem !important; }
-
-}
 
 // ---------------------------------------------------------
 // Page Transitions

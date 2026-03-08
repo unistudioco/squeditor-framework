@@ -5,6 +5,7 @@
 $site = [
     'name'        => 'My Project',
     'lang'        => 'en',
+    'dir'         => 'ltr', // 'ltr' or 'rtl'
     'logo'        => 'assets/static/images/logo.svg',
     'description' => 'Squeditor project starter template.',
     'og_image'    => 'assets/static/images/og-default.png',

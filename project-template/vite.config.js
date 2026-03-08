@@ -19,6 +19,7 @@ export default defineConfig({
                 main_css: path.resolve(__dirname, 'src/assets/scss/main.scss'),
                 tailwind: path.resolve(__dirname, 'src/assets/css/tailwind.css'),
                 'squeditor-icons': path.resolve(__dirname, 'src/assets/css/squeditor-icons.css'),
+                'fonts': path.resolve(__dirname, 'src/assets/css/fonts.css'),
             },
             output: {
                 entryFileNames: 'assets/js/[name].js',
@@ -60,6 +61,13 @@ export default defineConfig({
         name: 'php-watch',
         handleHotUpdate({ file, server }) {
             if (file.endsWith('.php')) {
+                // Force Vite to invalidate CSS modules so Tailwind generates new classes
+                const tailwindModule = server.moduleGraph.getModuleById(path.resolve(__dirname, 'src/assets/css/tailwind.css'));
+                if (tailwindModule) server.moduleGraph.invalidateModule(tailwindModule);
+                
+                const scssModule = server.moduleGraph.getModuleById(path.resolve(__dirname, 'src/assets/scss/main.scss'));
+                if (scssModule) server.moduleGraph.invalidateModule(scssModule);
+
                 server.ws.send({ type: 'full-reload' });
             }
         }

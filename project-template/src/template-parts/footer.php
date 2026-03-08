@@ -9,8 +9,8 @@ if ($layout !== 'default') {
 }
 ?>
 <!-- Site Footer -->
-<footer id="sq_footer" class="sq--footer py-24 border-t dark:border-transparent dark:bg-black/40">
-  <div class="sq--footer--inner max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-12 text-body">
+<footer id="sq_footer" class="sq-footer py-12 md:py-18 lg:py-24 border-t dark:border-transparent dark:bg-black/40">
+  <div class="sq-footer-inner max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-8 lg:gap-12">
     <div class="sq--footer--brand md:col-span-2">
       <div class="flex items-center gap-2 mb-6">
         <a href="index.html" class="sq--logo flex items-center gap-2 group">
@@ -20,7 +20,7 @@ if ($layout !== 'default') {
           <h1 class="font-bold text-xl m-0 tracking-tight"><?= htmlspecialchars($site['name']) ?></h1>
         </a>
       </div>
-      <p class="text-sm max-w-xs leading-relaxed mb-8">
+      <p class="text-sm max-w-xs leading-relaxed mb-6">
         <?= htmlspecialchars($site['description']) ?>
       </p>
       <div class="flex gap-4">
@@ -61,11 +61,11 @@ if ($layout !== 'default') {
       </ul>
     </div>
   </div>
-  <div class="sq--footer--divider max-w-7xl mx-auto px-6 mt-20 mb-8">
+  <div class="sq-footer-divider max-w-7xl mx-auto px-6 mt-8 md:mt-12 lg:mt-16 mb-8">
     <hr>
   </div>
-  <div class="sq--footer--bottom max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-    <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($site['name']) ?>. Built locally by Developers.</p>
+  <div class="sq-footer-bottom max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted">
+    <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($site['name']) ?>. Built with ❤️ by Expert Developers.</p>
     <div class="flex gap-8">
       <a href="#" class="hover:text-secondary transition-colors">Terms of Service</a>
       <a href="#" class="hover:text-secondary transition-colors">Privacy Policy</a>

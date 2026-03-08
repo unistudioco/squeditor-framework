@@ -17,7 +17,7 @@ $items = $items ?? [];
               <li class="flex items-center gap-2"><i class="sq-icon-chevron-right opacity-30"></i> <?= htmlspecialchars($feature) ?></li>
             <?php endforeach; ?>
           </ul>
-          <span class="absolute top-6 end-6 w-10 h-10 p-0 rounded-full flex items-center justify-center border border-zinc-200 dark:border-zinc-800 group-hover:-rotate-45 transition-transform duration-300">
+          <span class="absolute top-6 end-6 w-10 h-10 p-0 rounded-full flex items-center justify-center bg-white group-hover:-rotate-45 transition-transform duration-300">
             <i class="sq-icon-arrow-right"></i>
           </span>
         </div>
