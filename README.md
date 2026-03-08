@@ -1,15 +1,9 @@
 **Squeditor Framework** is a high-performance, developer-first framework for building lightning-fast, static websites. It combines the power of **PHP-style templating** with the modern performance of **Tailwind CSS**, the interactivity of **UIKit 3**, and the speed of **Vite**.
 
-We implement AI Agents skills to help you build your website easily in minutes. You can use AI Agents to generate well organized and clean code, components, sections, and pages and ship landing pages and saas and agency websites 10x faster.
+We implement [AI Agents skills](https://docs.squeditor.com/framework/agents) to help you build your website easily in minutes. You can use AI Agents to generate well organized and clean code, components, sections, and pages and ship landing pages and saas and agency websites 10x faster.
 
-### Showcase and Demo
-
-[Main Demo](https://squeditor.com/showcase/main-demo/)  |  
-[All Components](https://squeditor.com/showcase/all-components/)  |  
-[Style Guide](https://squeditor.com/showcase/style-guide/)  |  
-[GSAP Animations](https://squeditor.com/showcase/gsap-animations/)
-
-[Full Documentation](https://docs.squeditor.com/framework/getting-started/introduction)
+### Full Documentation
+[Read Docs](https://docs.squeditor.com/framework/getting-started/introduction)
 
 ### Key Features
 
@@ -26,10 +20,8 @@ We implement AI Agents skills to help you build your website easily in minutes. 
 
 ```bash
 [workspace-root]/
-├── php/                    # 🏗 CORE - PHP framework helpers
-├── scripts/                # 🏗 CORE - Build and dev scripts
-├── project-template/       # 🚀 STARTER - Blank project generator
-└── showcase/               # 💎 DEMO - Full-featured example project
+├── squeditor-framework/    # CORE - Framework engine (PHP helpers, scripts)
+└── your-project-name/      # TEMPLATE - Generated project
 ```
 
 ---
@@ -37,13 +29,26 @@ We implement AI Agents skills to help you build your website easily in minutes. 
 ### Getting Started
 
 #### 1. Scaffold a New Project
-Squeditor includes a robust CLI scaffolding tool. It generates a completely clean, minimalist project instance fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
+Squeditor Framework includes a robust CLI scaffolding tool. It generates a completely clean, minimalist project instance fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
 
-To scaffold your new project, simply run the following command in your terminal:
+To scaffold your new project and install `@squeditor-framework`, simply run the following command in your terminal:
 ```bash
 npx @squeditor/squeditor-framework your-project-name
 ```
-*(Replace `your-project-name` with your desired folder name).*
+
+**Alternative: Manual Setup**
+
+If you prefer to set up the project manually, you can clone the framework repository via:
+```bash
+git clone https://github.com/unistudioco/squeditor-framework.git
+```
+
+Then, scaffold a new project using this:
+```bash
+npm run scaffold your-project-name
+```
+
+*(Replace `your-project-name` with your desired project name).*
 
 #### 2. Development
 Navigate into your newly generated project folder, install its dependencies, and start the development server:
@@ -53,13 +58,10 @@ npm install
 npm run dev
 ```
 
-> [!CAUTION]
-> **Use Port 3001 for Development**
-> Vite will show a link to `http://127.0.0.1:5173/` in your terminal. **Do not use that link.**
-> Instead, always visit the PHP Server address: **`http://127.0.0.1:3001`**. This is because Squeditor Framework uses PHP for template rendering, and Vite only serves the static assets.
+Visit the PHP Server address: **`http://127.0.0.1:3001`** or **`http://localhost:3001`**. This is because Squeditor Framework uses PHP for template rendering, and Vite only serves the static assets.
 
 #### 3. Build for Production
-Generate the static `dist/` folder and a distributable ZIP archive:
+This will generate the static `dist/` folder and a distributable ZIP archive:
 ```bash
 npm run build
 ```
@@ -77,15 +79,21 @@ npm run build
 
 ---
 
+### Changelog
+
+Latest improvements, fixes and updates can be found here [Changelog](https://docs.squeditor.com/framework/changelog)
+
+---
+
 ### Contributing
 
-We welcome contributions! Whether it's adding new section variants, improving the build pipeline, or refining the token system, feel free to open a PR.
+We welcome contributions! Please read this guide to understand our development process and how you can get involved [Contributing Guide](https://docs.squeditor.com/framework/contributing)
 
 ---
 
 ### License
 
-Squeditor Framework is released under the [MIT License](LICENSE).
+Squeditor Framework is released under the [MIT License](https://docs.squeditor.com/framework/license).
 
 ---
 
