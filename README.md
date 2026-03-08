@@ -1,34 +1,28 @@
 **Squeditor Framework** is a high-performance, developer-first framework for building lightning-fast, static websites. It combines the power of **PHP-style templating** with the modern performance of **Tailwind CSS**, the interactivity of **UIKit 3**, and the speed of **Vite**.
 
+We implement AI Agents skills to help you build your website easily in minutes. You can use AI Agents to generate well organized and clean code, components, sections, and pages and ship landing pages and saas and agency websites 10x faster.
+
+### Showcase and Demo
+
+[Main Demo](https://squeditor.com/showcase/main-demo/)
+[All Components](https://squeditor.com/showcase/all-components/)
+[Style Guide](https://squeditor.com/showcase/style-guide/)
+[GSAP Animations](https://squeditor.com/showcase/gsap-animations/)
+
 [Full Documentation](https://docs.squeditor.com)
 
-## 🚀 Key Features
+### Key Features
 
-### 🛠 Zero-Runtime PHP Templating
-Develop using familiar WordPress-style functions like `get_template_part()` and `get_section()`, use PHP arrays as your data layer, and leverage loops to build complex layouts. The production build "snaps" everything into pure HTML, requiring zero server-side processing.
-
-### 🧩 Selective UIKit 3 Integration
-Stop loading massive component libraries. Squeditor Framework uses a **Component Manifest System** (via `uikit-manifest.json`) to tree-shake UIKit. Use only what you need (like a Slider or Modal) and Squeditor Framework will automatically bundle just the necessary SCSS and JS.
-
-### 🎨 Token-Based Styling Architecture
-Fully themeable via a centralized Design Token system (`_tokens.scss`). Every component and layout utility consumes CSS Custom Properties (`--sq-*`), allowing you to swap entire visual identities or color schemas (Light/Dark) instantly across the site.
-
-### 🌓 Built-in Light/Dark Mode
-Native support for `sq-theme-dark` classes and Tailwind's `dark:` utilities. The framework detects schema settings from the environment (or URL) and applies them globally to the body, ensuring a seamless and premium dark mode experience.
-
-### 📚 Section-Based Workflow
-Build pages in minutes using a library of pre-built, token-aware section variants:
-- **Hero**: Video, Split, Centered
-- **Cards**: Grids, Horizontal, Feature lists
-- **CTA**: Split, Banner, In-line
-- **Global**: Responsive Header, Deep-linked Footer
-
-### 📖 Automatic Style Guide
-Every project includes an automatically generated `style-guide.php` page that renders every active component and its variants, serving as your project's living documentation.
+- Zero-Runtime PHP Templating
+- Selective UIKit 3 Integration
+- Token-Based Styling Architecture
+- Built-in Light/Dark Mode
+- Section-Based Workflow
+- Automatic Style Guide
 
 ---
 
-## 🏗 Project Architecture
+### Project Architecture
 
 ```bash
 [workspace-root]/
@@ -40,9 +34,9 @@ Every project includes an automatically generated `style-guide.php` page that re
 
 ---
 
-## 🏁 Getting Started
+### Getting Started
 
-### 1. Scaffold a New Project
+#### 1. Scaffold a New Project
 Squeditor includes a robust CLI scaffolding tool. It generates a completely clean, minimalist project instance fully pre-configured to utilize the advanced GSAP and UIKit engines without demo bloat.
 
 To scaffold your new project, simply run the following command in your terminal:
@@ -51,7 +45,7 @@ npx @squeditor/squeditor-framework your-project-name
 ```
 *(Replace `your-project-name` with your desired folder name).*
 
-### 2. Development
+#### 2. Development
 Navigate into your newly generated project folder, install its dependencies, and start the development server:
 ```bash
 cd your-project-name
@@ -64,7 +58,7 @@ npm run dev
 > Vite will show a link to `http://127.0.0.1:5173/` in your terminal. **Do not use that link.**
 > Instead, always visit the PHP Server address: **`http://127.0.0.1:3001`**. This is because Squeditor Framework uses PHP for template rendering, and Vite only serves the static assets.
 
-### 3. Build for Production
+#### 3. Build for Production
 Generate the static `dist/` folder and a distributable ZIP archive:
 ```bash
 npm run build
@@ -72,7 +66,7 @@ npm run build
 
 ---
 
-## 🛠 Technology Stack
+### Technology Stack
 
 - **Dev Engine**: PHP 8.2+ (as a templating pre-processor)
 - **CSS Architecture**: Tailwind CSS + SCSS (Layered Overrides)
@@ -83,13 +77,13 @@ npm run build
 
 ---
 
-## 🤝 Contributing
+### Contributing
 
 We welcome contributions! Whether it's adding new section variants, improving the build pipeline, or refining the token system, feel free to open a PR.
 
 ---
 
-## 📄 License
+### License
 
 Squeditor Framework is released under the [MIT License](LICENSE).
 

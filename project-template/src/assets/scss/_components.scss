@@ -10,7 +10,7 @@
     font-size: var(--sq-btn-font-size);
     font-weight: var(--sq-btn-font-weight);
 
-    @apply inline-flex items-center justify-center gap-2 py-0 px-4 transition-colors transition-all duration-200 cursor-pointer border-none outline-none no-underline;
+    @apply inline-flex items-center justify-center gap-2 py-0 px-4 transition-all duration-200 cursor-pointer outline-none no-underline;
 }
 
 .btn-sm {
@@ -18,8 +18,13 @@
     height: 2rem;
 }
 
+.btn-md {
+    @apply text-base px-4;
+    height: 2.5rem;
+}
+
 .btn-lg {
-    @apply text-lg px-6;
+    @apply text-base px-6;
     height: 3rem;
 }
 
@@ -123,6 +128,106 @@
     .sq-header--sticky {
         background: rgb(0 0 0 / 75%);
     }
+}
+
+// ---------------------------------------------------------
+// Container + Expand Container
+// ---------------------------------------------------------
+@layer components {
+    .container {
+        width: 100%;
+
+        @screen sm  { max-width: 540px;  }
+        @screen md  { max-width: 720px;  }
+        @screen lg  { max-width: 960px;  }
+        @screen xl  { max-width: 1140px; }
+        @screen 2xl { max-width: 1280px; }
+    }
+
+    /* Base breakout — expands equally both sides */
+    .expand-container {
+        --scroll-width: var(--body-scroll-width, 17px);
+        --expand-size: calc((100vw - var(--scroll-width) - 100%) / -2);
+        margin-right: var(--expand-size);
+        margin-left: var(--expand-size);
+    }
+
+    .expand-container-end {
+        --scroll-width: var(--body-scroll-width, 17px);
+        /* Use width increase instead of negative margin */
+        --expand-size: calc((100vw - var(--scroll-width) - 100%) / 2);
+        width: calc(100% + var(--expand-size));
+        overflow: visible; /* let image overflow naturally */
+    }
+
+    .expand-container-start {
+        --scroll-width: var(--body-scroll-width, 17px);
+        --expand-size: calc((100vw - var(--scroll-width) - 100%) / 2);
+        width: calc(100% + var(--expand-size));
+        margin-left: calc(var(--expand-size) * -1);
+        overflow: visible;
+    }
+
+}
+
+// ---------------------------------------------------------
+// Form icon group
+// ---------------------------------------------------------
+@layer components {
+
+  /* Base */
+  .form-icon-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .form-icon-group .form-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    height: 100%;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    text-decoration: none;
+    user-select: none;
+  }
+
+  /* Icon widths based on input size */
+  .form-icon-group .form-control + .form-icon              { width: 3rem !important;   }
+  .form-icon-group .form-control.form-control-lg + .form-icon { width: 3.5rem !important; }
+  .form-icon-group .form-control.form-control-sm + .form-icon { width: 2.5rem !important; }
+  .form-icon-group .form-control.form-control-xs + .form-icon { width: 2rem !important;   }
+
+  /* Icon on the LEFT (default) */
+  .form-icon-group:not(.form-icon-flip) .form-control              { padding-left: 2.75rem !important; }
+  .form-icon-group:not(.form-icon-flip) .form-control.form-control-lg { padding-left: 3.25rem !important; }
+  .form-icon-group:not(.form-icon-flip) .form-control.form-control-sm { padding-left: 2.25rem !important; }
+  .form-icon-group:not(.form-icon-flip) .form-control.form-control-xs { padding-left: 1.75rem !important; }
+
+  /* RTL — icon on the LEFT */
+  [dir="rtl"] .form-icon-group:not(.form-icon-flip) .form-control              { padding-left: 1rem !important;   padding-right: 2.75rem !important; }
+  [dir="rtl"] .form-icon-group:not(.form-icon-flip) .form-control.form-control-lg { padding-left: 1rem !important; padding-right: 3.25rem !important; }
+  [dir="rtl"] .form-icon-group:not(.form-icon-flip) .form-control.form-control-sm { padding-left: 1rem !important; padding-right: 2.25rem !important; }
+  [dir="rtl"] .form-icon-group:not(.form-icon-flip) .form-control.form-control-xs { padding-left: 1rem !important; padding-right: 1.75rem !important; }
+
+  /* Icon on the RIGHT (flip) */
+  .form-icon-group.form-icon-flip .form-icon                           { right: 0; }
+  .form-icon-group.form-icon-flip .form-control                        { padding-right: 2.75rem !important; }
+  .form-icon-group.form-icon-flip .form-control.form-control-lg        { padding-right: 3.25rem !important; }
+  .form-icon-group.form-icon-flip .form-control.form-control-sm        { padding-right: 2.25rem !important; }
+  .form-icon-group.form-icon-flip .form-control.form-control-xs        { padding-right: 1.75rem !important; }
+
+  /* RTL — icon on the RIGHT (flip) */
+  [dir="rtl"] .form-icon-group.form-icon-flip .form-control              { padding-right: 1rem !important; padding-left: 2.75rem !important; }
+  [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-lg { padding-right: 1rem !important; padding-left: 3.25rem !important; }
+  [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-sm { padding-right: 1rem !important; padding-left: 2.25rem !important; }
+  [dir="rtl"] .form-icon-group.form-icon-flip .form-control.form-control-xs { padding-right: 1rem !important; padding-left: 1.75rem !important; }
+
 }
 
 // ---------------------------------------------------------
