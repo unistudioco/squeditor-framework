@@ -124,10 +124,9 @@
     }
 }
 
-.sq-theme-dark {
-    .sq-header--sticky {
-        background: rgb(0 0 0 / 75%);
-    }
+.sq-theme-dark .sq-header-sticky,
+.sq-header-sticky.sq-theme-dark {
+    background: rgb(0 0 0 / 75%);
 }
 
 // ---------------------------------------------------------

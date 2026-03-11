@@ -1,4 +1,5 @@
 import Splide, { EventInterface } from '@splidejs/splide';
+import { AutoScroll } from '@splidejs/splide-extension-auto-scroll';
 
 // Splide CSS is handled separately by build-components.js → slider.min.css
 
@@ -191,10 +192,20 @@ export function initSplide() {
 
             const splide = new Splide(el, overrideOptions);
 
+            const extensions = {};
+            
+            // Only add AutoScroll if explicitly requested in data-splide
+            if (optionsStr) {
+                const options = JSON.parse(optionsStr);
+                if (options.autoScroll) {
+                    extensions.AutoScroll = AutoScroll;
+                }
+            }
+
             if (requestedType && CustomTransitions[requestedType]) {
-                splide.mount({}, CustomTransitions[requestedType]);
+                splide.mount(extensions, CustomTransitions[requestedType]);
             } else {
-                splide.mount();
+                splide.mount(extensions);
             }
         } catch (e) {
             console.error('[Squeditor] Error initializing Splide slider', el, e);

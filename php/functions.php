@@ -123,7 +123,17 @@ function get_image(string $filename, string $alt = '', string $class = '', bool 
     }
     
     if ($inline) {
-        return file_get_contents($full_path);
+        $svg_content = file_get_contents($full_path);
+        if ($class !== '') {
+            $class_attr = htmlspecialchars($class);
+            if (preg_match('/<svg\s[^>]*class=([\'"])(.*?)\1/is', $svg_content, $matches)) {
+                $new_class = trim($matches[2] . ' ' . $class_attr);
+                $svg_content = preg_replace('/(<svg\s[^>]*)class=[\'"].*?[\'"]/is', '$1class="' . $new_class . '"', $svg_content, 1);
+            } else {
+                $svg_content = preg_replace('/<svg(\s|>)/is', '<svg class="' . $class_attr . '"$1', $svg_content, 1);
+            }
+        }
+        return $svg_content;
     }
     
     // We assume images are served from /assets/static/images/ relative to document root
@@ -134,4 +144,21 @@ function get_image(string $filename, string $alt = '', string $class = '', bool 
     $class_attr = $class !== '' ? sprintf(' class="%s"', htmlspecialchars($class)) : '';
     
     return sprintf('<img src="%s" alt="%s"%s>', htmlspecialchars($web_path), htmlspecialchars($alt), $class_attr);
+}
+
+/**
+ * Get the path to a video file in the assets/static/videos/ directory.
+ *
+ * @param string $filename  Filename inside src/assets/static/videos/, e.g., 'medical-clinic-entrance.mp4'
+ * @return string           Web path to the video file, or empty string if not found
+ */
+function get_video(string $filename): string {
+    $full_path = SRC_PATH . '/assets/static/videos/' . ltrim($filename, '/');
+    if (!file_exists($full_path)) {
+        trigger_error("Video not found: {$full_path}", E_USER_WARNING);
+        return '';
+    }
+    
+    // We assume videos are served from /assets/static/videos/ relative to document root
+    return 'assets/static/videos/' . ltrim($filename, '/');
 }

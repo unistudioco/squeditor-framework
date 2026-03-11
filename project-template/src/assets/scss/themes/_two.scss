@@ -57,7 +57,7 @@ $sq-color-heading-text: #272164;
     @apply selection:bg-secondary selection:text-black;
 }
 
-.theme-two.sq-theme-dark {
+.theme-two.sq-theme-dark, .theme-two .sq-theme-dark {
     $sq-color-primary-dark: #16239a;
     $sq-color-secondary-dark: #ffc156;
     $sq-color-accent-dark: #f59e0b;

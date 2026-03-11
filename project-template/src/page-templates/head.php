@@ -42,8 +42,8 @@ if (file_exists(__DIR__ . '/../config/active-slider.php')) {
   <script type="module" src="<?= $vite_server ?>/@vite/client"></script>
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/fonts.css">
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/squeditor-icons.css">
-  <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/tailwind.css">
   <?php if ($active_slider): ?><link rel="stylesheet" href="<?= $vite_server ?>/assets/css/slider.min.css"><?php endif; ?>
+  <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/tailwind.css">
   <script type="module" src="<?= $vite_server ?>/assets/scss/main.scss"></script>
   <style>html.js-fouc { opacity: 0; transition: opacity 0.15s ease-out; }</style>
   <script>document.documentElement.classList.add('js-fouc');</script>
@@ -51,7 +51,7 @@ if (file_exists(__DIR__ . '/../config/active-slider.php')) {
   <!-- Production Static Assets -->
   <link rel="stylesheet" href="assets/css/fonts.css">
   <link rel="stylesheet" href="assets/css/squeditor-icons.css">
-  <link rel="stylesheet" href="assets/css/tailwind.css">
   <?php if ($active_slider): ?><link rel="stylesheet" href="assets/css/slider.min.css"><?php endif; ?>
+  <link rel="stylesheet" href="assets/css/tailwind.css">
   <link rel="stylesheet" href="assets/css/main.min.css">
 <?php endif; ?>

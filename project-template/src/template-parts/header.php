@@ -33,7 +33,7 @@ if ($layout !== 'default') {
        <a href="https://squeditor.com/" class="btn btn-secondary !hidden md:!inline-flex">Try Squeditor</a>
       
       <!-- Mobile Toggle -->
-      <button class="sq-header-mobile-toggle md:hidden" data-gsap-toggle="#sq_offcanvas_creative" type="button" aria-label="Menu">
+      <button class="sq-header-mobile-toggle inline-flex items-center justify-center w-8 h-8 md:hidden" data-gsap-toggle="#sq_offcanvas_creative" type="button" aria-label="Menu">
         <span data-uk-icon="icon: menu; ratio: 1.5"></span>
       </button>
     </div>
