@@ -43,10 +43,10 @@ if (!$active_theme) {
         } elseif (isset($active_themes[$path_no_slash])) {
             $active_theme = $active_themes[$path_no_slash];
         } else {
-            $active_theme = 'default';
+            $active_theme = 'modern';
         }
     } else {
-        $active_theme = 'default';
+        $active_theme = 'modern';
     }
 }
 

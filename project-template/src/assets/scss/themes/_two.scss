@@ -9,7 +9,7 @@ $sq-color-body-bg: #f4f1eb;
 $sq-color-body-text: #201a63;
 $sq-color-heading-text: #272164;
 
-.theme-two {
+.theme-two, .theme-two .sq-theme-light {
     --sq-color-primary: #{$sq-color-primary};
     --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-secondary: #{$sq-color-secondary};

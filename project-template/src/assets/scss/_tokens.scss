@@ -17,24 +17,8 @@ $color-body-text: #19191b !default;
 $color-heading-text: #19191b !default;
 $color-border: rgba(138, 138, 138, 0.196) !default;
 
+// 2. Global Design Tokens (Static context)
 :root {
-    // Brand colors
-    --sq-color-primary: #{$color-primary};
-    --sq-color-primary-contrast: #{sq-color-contrast($color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-secondary: #{$color-secondary};
-    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-accent: #{$color-accent};
-    --sq-color-accent-contrast: #{sq-color-contrast($color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-white: #{$color-white};
-    --sq-color-muted-text: #{$color-muted-text};
-    --sq-color-muted-bg: #{$color-muted-bg};
-    --sq-color-light: #{$color-light};
-    --sq-color-dark: #{$color-dark};
-    --sq-color-body-bg: #{$color-body-bg};
-    --sq-color-body-text: #{$color-body-text};
-    --sq-color-heading-text: #{$color-heading-text};
-    --sq-color-border: #{$color-border};
-
     // Typography
     --sq-font-sans: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --sq-font-heading: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -74,6 +58,26 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     --sq-page-transition-from: var(--sq-color-secondary);
     --sq-page-transition-via: var(--sq-color-accent);
     --sq-page-transition-to: var(--sq-color-accent);
+}
+
+// 3. Schema Tokens (Mode context)
+:root, .sq-theme-light {
+    // Brand colors
+    --sq-color-primary: #{$color-primary};
+    --sq-color-primary-contrast: #{sq-color-contrast($color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-secondary: #{$color-secondary};
+    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-accent: #{$color-accent};
+    --sq-color-accent-contrast: #{sq-color-contrast($color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
+    --sq-color-white: #{$color-white};
+    --sq-color-muted-text: #{$color-muted-text};
+    --sq-color-muted-bg: #{$color-muted-bg};
+    --sq-color-light: #{$color-light};
+    --sq-color-dark: #{$color-dark};
+    --sq-color-body-bg: #{$color-body-bg};
+    --sq-color-body-text: #{$color-body-text};
+    --sq-color-heading-text: #{$color-heading-text};
+    --sq-color-border: #{$color-border};
 
     // --- Component Tokens ---
 
