@@ -1,23 +1,9 @@
+// ⚠️ FRAMEWORK FILE — Do not edit. This file will be replaced on updates.
+// To customize colors, edit _config.scss instead.
+// To customize other tokens, use custom.scss or theme-specific overrides.
 // _tokens.scss — Design tokens as CSS custom properties
 
-// 1. Define SASS Variables for calculations
-$color-primary: #107466 !default;
-$color-primary-dark: #F0FF44 !default;
-$color-secondary: #1c2020 !default;
-$color-secondary-dark: #fef1e7 !default;
-$color-accent: #e5fdc5 !default;
-$color-accent-dark: #e5fdc5 !default;
-$color-white: #FFFFFF !default;
-$color-muted-text: #707070 !default;
-$color-muted-bg: #fef1e7 !default;
-$color-light: #f8f8f8 !default;
-$color-dark: #19191b !default;
-$color-body-bg: #FFFFFF !default;
-$color-body-text: #19191b !default;
-$color-heading-text: #19191b !default;
-$color-border: rgba(138, 138, 138, 0.196) !default;
-
-// 2. Global Design Tokens (Static context)
+// 1. Global Design Tokens (Static context — never change per theme)
 :root {
     // Typography
     --sq-font-sans: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -60,38 +46,11 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     --sq-page-transition-to: var(--sq-color-accent);
 }
 
-// 3. Schema Tokens (Mode context)
+// 2. Color Tokens — auto-generated from $base-colors / $base-colors-dark in _config.scss
+@include sq-theme-base($base-colors, $base-colors-dark);
+
+// 3. Component Tokens (reference color vars — auto-cascade when colors change)
 :root, .sq-theme-light {
-    // Brand colors
-    --sq-color-primary: #{$color-primary};
-    --sq-color-primary-rgb: #{sq-rgb($color-primary)};
-    --sq-color-primary-contrast: #{sq-color-contrast($color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-secondary: #{$color-secondary};
-    --sq-color-secondary-rgb: #{sq-rgb($color-secondary)};
-    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-accent: #{$color-accent};
-    --sq-color-accent-rgb: #{sq-rgb($color-accent)};
-    --sq-color-accent-contrast: #{sq-color-contrast($color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-white: #{$color-white};
-    --sq-color-white-rgb: #{sq-rgb($color-white)};
-    --sq-color-muted-text: #{$color-muted-text};
-    --sq-color-muted-text-rgb: #{sq-rgb($color-muted-text)};
-    --sq-color-muted-bg: #{$color-muted-bg};
-    --sq-color-muted-bg-rgb: #{sq-rgb($color-muted-bg)};
-    --sq-color-light: #{$color-light};
-    --sq-color-light-rgb: #{sq-rgb($color-light)};
-    --sq-color-dark: #{$color-dark};
-    --sq-color-dark-rgb: #{sq-rgb($color-dark)};
-    --sq-color-body-bg: #{$color-body-bg};
-    --sq-color-body-bg-rgb: #{sq-rgb($color-body-bg)};
-    --sq-color-body-text: #{$color-body-text};
-    --sq-color-body-text-rgb: #{sq-rgb($color-body-text)};
-    --sq-color-heading-text: #{$color-heading-text};
-    --sq-color-heading-text-rgb: #{sq-rgb($color-heading-text)};
-    --sq-color-border: #{$color-border};
-
-    // --- Component Tokens ---
-
     // Buttons
     --sq-btn-height: 2.75rem;
     --sq-btn-bg: transparent;
@@ -176,31 +135,8 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
     --sq-drop-close-color: var(--sq-color-muted-text);
 }
 
-// Global Schema Overrides
+// 4. Dark Mode Component Overrides
 .sq-theme-dark {
-    // Brand colors (Dark Mode Specific Overrides)
-    --sq-color-primary: #{$color-primary-dark};
-    --sq-color-primary-rgb: #{sq-rgb($color-primary-dark)};
-    --sq-color-primary-contrast: #{sq-color-contrast($color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-secondary: #{$color-secondary-dark};
-    --sq-color-secondary-rgb: #{sq-rgb($color-secondary-dark)};
-    --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-accent: #{$color-accent-dark};
-    --sq-color-accent-rgb: #{sq-rgb($color-accent-dark)};
-    --sq-color-accent-contrast: #{sq-color-contrast($color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-
-    // Standard structural adjustments
-    --sq-color-body-bg: #19191b;
-    --sq-color-body-bg-rgb: #{sq-rgb(#19191b)};
-    --sq-color-body-text: #F1F5F9;
-    --sq-color-body-text-rgb: #{sq-rgb(#F1F5F9)};
-    --sq-color-heading-text: #ffffff;
-    --sq-color-heading-text-rgb: #{sq-rgb(#ffffff)};
-    --sq-color-muted-text: #c7cacd;
-    --sq-color-muted-text-rgb: #{sq-rgb(#c7cacd)};
-    --sq-color-muted-bg: #272729;
-    --sq-color-muted-bg-rgb: #{sq-rgb(#272729)};
-
     // Buttons
     --sq-btn-default-bg: var(--sq-color-light);
     --sq-btn-default-text: var(--sq-color-muted-text);

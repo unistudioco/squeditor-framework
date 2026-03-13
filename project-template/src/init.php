@@ -7,6 +7,15 @@ require_once __DIR__ . '/../../squeditor-framework/php/functions.php';
 // Require site-wide config
 require_once __DIR__ . '/config/site-config.php';
 
+// Load site settings (demo mode vs customer mode)
+$site['demo_mode'] = true; // Default
+if (file_exists(__DIR__ . '/config/site-settings.php')) {
+    require_once __DIR__ . '/config/site-settings.php';
+    if (isset($site_settings['is_demo_mode'])) {
+        $site['demo_mode'] = $site_settings['is_demo_mode'];
+    }
+}
+
 // Define SRC_PATH for get_template_part() calls
 define('SRC_PATH', __DIR__);
 

@@ -1,0 +1,93 @@
+// ⚠️ FRAMEWORK FILE — Do not edit. This file will be replaced on updates.
+// _theme-engine.scss
+// ==========================================
+// Auto-generates CSS custom properties from Sass color maps.
+// Produces --sq-color-*, --sq-color-*-rgb, and --sq-color-*-contrast
+// for each entry in the color map.
+//
+// Dependencies: Loaded AFTER _config.scss and _functions.scss via Vite additionalData.
+// Uses global functions: sq-rgb(), sq-color-contrast()
+// Uses global variables: $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio
+//
+// Usage:
+//   @include sq-theme-base($base-colors, $base-colors-dark);
+//   @include sq-theme('.theme-two', $colors, $dark-colors, $overrides, $dark-overrides);
+// ==========================================
+
+// Color keys that get automatic contrast text calculation
+$_contrast-keys: ('primary', 'secondary', 'accent') !default;
+
+// ---------------------------------------------------------------------------
+// Internal: emit CSS custom properties for a single color map
+// ---------------------------------------------------------------------------
+@mixin _sq-emit-colors($colors) {
+    @each $key, $value in $colors {
+        --sq-color-#{$key}: #{$value};
+
+        // Only generate RGB variant for actual Sass colors (not var() references)
+        @if type-of($value) == 'color' {
+            --sq-color-#{$key}-rgb: #{sq-rgb($value)};
+
+            // Generate contrast text for brand colors
+            @if index($_contrast-keys, $key) {
+                --sq-color-#{$key}-contrast: #{sq-color-contrast(
+                    $value,
+                    $sq-contrast-light-text,
+                    $sq-contrast-dark-text,
+                    $sq-min-contrast-ratio
+                )};
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Internal: emit arbitrary overrides as --sq-{key}: {value}
+// ---------------------------------------------------------------------------
+@mixin _sq-emit-overrides($overrides) {
+    @each $key, $value in $overrides {
+        --sq-#{$key}: #{$value};
+    }
+}
+
+// ---------------------------------------------------------------------------
+// sq-theme-base: output base/default colors to :root and .sq-theme-dark
+// Used by _tokens.scss for the default color scheme.
+// ---------------------------------------------------------------------------
+@mixin sq-theme-base($colors, $dark-colors: ()) {
+    :root, .sq-theme-light {
+        @include _sq-emit-colors($colors);
+    }
+
+    @if length(map-keys($dark-colors)) > 0 {
+        .sq-theme-dark {
+            @include _sq-emit-colors($dark-colors);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// sq-theme: output a named theme scoped to a body class selector.
+//
+// $selector     — e.g. '.theme-two'
+// $colors       — light mode color map
+// $dark-colors  — dark mode color overrides (only keys that change)
+// $overrides    — optional non-color token overrides (e.g. radius, btn-radius)
+// $dark-overrides — optional dark-mode-only non-color overrides
+// ---------------------------------------------------------------------------
+@mixin sq-theme($selector, $colors, $dark-colors: (), $overrides: (), $dark-overrides: ()) {
+    #{$selector}, 
+    #{$selector}.sq-theme-light, 
+    #{$selector} .sq-theme-light {
+        @include _sq-emit-colors($colors);
+        @include _sq-emit-overrides($overrides);
+        @content;
+    }
+
+    @if length(map-keys($dark-colors)) > 0 or length(map-keys($dark-overrides)) > 0 {
+        #{$selector}.sq-theme-dark, #{$selector} .sq-theme-dark {
+            @include _sq-emit-colors($dark-colors);
+            @include _sq-emit-overrides($dark-overrides);
+        }
+    }
+}

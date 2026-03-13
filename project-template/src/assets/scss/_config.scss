@@ -1,13 +1,38 @@
 // _config.scss
-// Framework Configuration Variables
+// ==========================================
+// ✏️ CUSTOMIZE HERE — This is the main configuration file.
+// Change colors below to match your brand.
 // ==========================================
 
-// Global Auto-Contrast Minimum Threshold 
-// Adjust this to change when button text flips from dark to light.
-// 4.5 = Strict WCAG AA contrast
-// 2.5 = Loose UI preference (default)
+// --- Contrast Settings ---
 $sq-min-contrast-ratio: 2.5;
-
-// Global Text Colors for Auto-Contrast
 $sq-contrast-dark-text: #19191b;
 $sq-contrast-light-text: #ffffff;
+
+// --- Base Colors (Light Mode) ---
+$base-colors: (
+    'primary':      #107466,
+    'secondary':    #1c2020,
+    'accent':       #e5fdc5,
+    'white':        #FFFFFF,
+    'muted-text':   #707070,
+    'muted-bg':     #fef1e7,
+    'light':        #f8f8f8,
+    'dark':         #19191b,
+    'body-bg':      #FFFFFF,
+    'body-text':    #19191b,
+    'heading-text': #19191b,
+    'border':       rgba(138, 138, 138, 0.196),
+) !default;
+
+// --- Dark Mode Overrides (only specify what changes) ---
+$base-colors-dark: (
+    'primary':      #F0FF44,
+    'secondary':    #fef1e7,
+    'accent':       #e5fdc5,
+    'body-bg':      #19191b,
+    'body-text':    #F1F5F9,
+    'heading-text': #ffffff,
+    'muted-text':   #c7cacd,
+    'muted-bg':     #272729,
+) !default;

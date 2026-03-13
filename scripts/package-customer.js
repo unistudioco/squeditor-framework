@@ -4,16 +4,21 @@ const { execSync } = require('child_process');
 
 const projectRoot = process.cwd();
 const config = require(path.join(projectRoot, 'squeditor.config.js'));
-const micromatch = require(path.join(projectRoot, 'node_modules/micromatch'));
+let micromatch;
+try {
+    micromatch = require('micromatch');
+} catch (e) {
+    console.warn('   - ⚠️  Warning: micromatch not found. Media blurring will be skipped.');
+}
 
 let sharp;
 try {
-    sharp = require(path.join(projectRoot, 'node_modules/sharp'));
+    sharp = require('sharp');
 } catch (e) { }
 
 let ffmpeg;
 try {
-    ffmpeg = require(path.join(projectRoot, 'node_modules/fluent-ffmpeg'));
+    ffmpeg = require('fluent-ffmpeg');
 } catch (e) { }
 
 const customerBuildDir = path.join(projectRoot, config.name || 'customer-package');
@@ -28,7 +33,7 @@ const blurConfig = mediaConfig.blur || { enabled: false };
 const optConfig = mediaConfig.optimize || { enabled: false };
 
 async function processMediaFile(src, dest, relPath) {
-    const isBlurEnabled = blurConfig.enabled;
+    const isBlurEnabled = blurConfig.enabled && micromatch;
     const isMatched = isBlurEnabled && micromatch.isMatch(relPath, blurConfig.include || [], { ignore: blurConfig.exclude || [] });
 
     const ext = path.extname(src).toLowerCase();
@@ -123,32 +128,135 @@ async function createCustomerPackage() {
         process.exit(1);
     }
 
-    if (fs.existsSync(customerBuildDir)) {
-        try {
-            fs.rmSync(customerBuildDir, { recursive: true, force: true });
-        } catch (e) {
-            console.warn(`   - ⚠️  Warning: Could not fully clean ${customerBuildDir}. You may need to remove it manually.`);
+    function safeMkdir(dir) {
+        if (!fs.existsSync(dir)) {
+            try {
+                fs.mkdirSync(dir, { recursive: true });
+            } catch (e) {
+                console.warn(`   - ⚠️  Warning: Could not create directory ${dir}.`);
+            }
         }
     }
-    if (fs.existsSync(zipPath)) {
-        fs.unlinkSync(zipPath);
+
+    // CSS cleaning function to remove demo-specific selectors
+    function cleanCssContent(content) {
+        // 1. Remove high-specificity typography overrides (demo mode stuff)
+        // Matches selectors like "html body h1, ... { ... }" that use var(--sq-font-heading) or !important
+        const highSpecRegex = /html\s+body\s+h[1-6][^}]*\{[^}]*var\(--sq-font-heading\)[^}]*\}/gi;
+        content = content.replace(highSpecRegex, '');
+
+        // 2. Remove .sq-theme-switcher specific styles
+        const switcherStylesRegex = /\.sq-theme-switcher[^}]*\{[^}]*\}/gi;
+        content = content.replace(switcherStylesRegex, '');
+
+        // 3. Remove theme-level font-family forces if requested (as per user feedback)
+        // Matches ".theme-name h1, ... { font-family: var(--sq-font-heading); }"
+        // and also the complex selector provided by the user
+        const themeFontRegex = /\.theme-[a-z0-9-]+\s+h[1-6][^}]*\{[^}]*font-family:\s*var\(--sq-font-heading\)[^}]*\}/gi;
+        content = content.replace(themeFontRegex, '');
+
+        // Additional catch-all for the complex selector from user feedback
+        const complexThemeFontRegex = /\.theme-[a-z0-9-]+[^}]*h[1-6][^}]*\{[^}]*font-family:\s*var\(--sq-font-heading\)[^}]*\}/gi;
+        content = content.replace(complexThemeFontRegex, '');
+
+        return content;
     }
 
-    fs.mkdirSync(path.join(customerBuildDir, 'dist/assets'), { recursive: true });
+    function safeMkdir(dir) {
+        if (!fs.existsSync(dir)) {
+            try {
+                fs.mkdirSync(dir, { recursive: true });
+            } catch (e) {
+                console.warn(`   - ⚠️  Warning: Could not create directory ${dir}.`);
+            }
+        }
+    }
+
+    safeMkdir(path.join(customerBuildDir, 'dist/assets'));
 
     console.log('   - Copying compiled HTML to dist/ and src/');
+    console.log('   - Cleaning HTML snapshots (selective themes & switcher removal)');
     const distHtmlFiles = fs.readdirSync(distDir).filter(file => file.endsWith('.html'));
-    fs.mkdirSync(path.join(customerBuildDir, 'src'), { recursive: true });
+    safeMkdir(path.join(customerBuildDir, 'src'));
+
+    const pageToTheme = {};
+    if (config.themes) {
+        Object.keys(config.themes).forEach(themeKey => {
+            const themeData = config.themes[themeKey];
+            if (themeData && themeData.pages) {
+                themeData.pages.forEach(page => {
+                    if (typeof page === 'string') {
+                        const htmlName = page.replace('.php', '.html');
+                        pageToTheme[htmlName] = themeKey;
+                    }
+                });
+            }
+        });
+    }
 
     distHtmlFiles.forEach(file => {
         let htmlContent = fs.readFileSync(path.join(distDir, file), 'utf8');
+        
+        // 1. Remove Theme Switcher Block (div + script + styles + comments)
+        // Aggressively target the isolation style block
+        htmlContent = htmlContent.replace(/<style>[\s\S]*?\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
+        // Target the switcher floating component
+        htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->[\s\S]*?<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
+        htmlContent = htmlContent.replace(/<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
+        htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->/g, '');
+
+        // 2. Identify assigned theme
+        const assignedTheme = pageToTheme[file];
+        const allThemes = Object.keys(config.themes || {});
+
         // dist/ gets production HTML referencing compiled CSS
-        fs.writeFileSync(path.join(customerBuildDir, 'dist', file), htmlContent);
+        let distHtml = htmlContent;
+        allThemes.forEach(t => {
+            if (t !== assignedTheme) {
+                const regex = new RegExp(`<link rel="stylesheet" href="assets/css/theme-${t}\\.min\\.css">\\s*`, 'g');
+                distHtml = distHtml.replace(regex, '');
+            }
+        });
+        fs.writeFileSync(path.join(customerBuildDir, 'dist', file), distHtml);
+
         // src/ gets dev HTML: rewrite CSS refs to raw SCSS for Vite HMR
         let devHtml = htmlContent;
+        // Rewrite main CSS
         devHtml = devHtml.replace(/href="assets\/css\/main\.min\.css"/g, 'href="assets/scss/main.scss"');
         devHtml = devHtml.replace(/href="assets\/css\/tailwind\.css"/g, 'href="assets/css/tailwind.css"');
+        
+        // Rewrite/Clean themes for dev
+        allThemes.forEach(t => {
+            const themeLinkRegex = new RegExp(`<link rel="stylesheet" href="assets/css/theme-${t}\\.min\\.css">`, 'g');
+            if (t === assignedTheme) {
+                // Transform to SCSS script for HMR
+                devHtml = devHtml.replace(themeLinkRegex, `<script type="module" src="assets/scss/theme-${t}.scss"></script>`);
+            } else {
+                // Remove entirely
+                devHtml = devHtml.replace(themeLinkRegex, '');
+            }
+        });
+        
         fs.writeFileSync(path.join(customerBuildDir, 'src', file), devHtml);
+    });
+
+    console.log('   - Copying theme configurations to src/config');
+    const customerConfigDir = path.join(customerBuildDir, 'src/config');
+    if (!fs.existsSync(customerConfigDir)) {
+        fs.mkdirSync(customerConfigDir, { recursive: true });
+    }
+    const configFiles = fs.readdirSync(path.join(srcDir, 'config'));
+    configFiles.forEach(file => {
+        const srcConfig = path.join(srcDir, 'config', file);
+        const destConfig = path.join(customerConfigDir, file);
+
+        if (file === 'site-settings.php') {
+            // Force demo_mode to false in customer package
+            const settingsContent = `<?php\n// Auto-generated by package-customer.js\n$site_settings = [\n    'is_demo_mode' => false,\n];\n`;
+            fs.writeFileSync(destConfig, settingsContent);
+        } else {
+            fs.copyFileSync(srcConfig, destConfig);
+        }
     });
 
     console.log('   - Copying necessary developer source files to src/assets');
@@ -156,16 +264,23 @@ async function createCustomerPackage() {
     // Also copy dist production files
     fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/css'), { recursive: true });
     
-    fs.copyFileSync(path.join(distDir, 'assets/css/tailwind.css'), path.join(customerBuildDir, 'src/assets/css/tailwind.css'));
-    fs.copyFileSync(path.join(distDir, 'assets/css/tailwind.css'), path.join(customerBuildDir, 'dist/assets/css/tailwind.css'));
-    
-    if (fs.existsSync(path.join(distDir, 'assets/css/squeditor-icons.css'))) {
-        fs.copyFileSync(path.join(distDir, 'assets/css/squeditor-icons.css'), path.join(customerBuildDir, 'src/assets/css/squeditor-icons.css'));
-        fs.copyFileSync(path.join(distDir, 'assets/css/squeditor-icons.css'), path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
+    const tailwindPath = path.join(distDir, 'assets/css/tailwind.css');
+    if (fs.existsSync(tailwindPath)) {
+        let twContent = fs.readFileSync(tailwindPath, 'utf8');
+        fs.writeFileSync(path.join(customerBuildDir, 'src/assets/css/tailwind.css'), cleanCssContent(twContent));
+        fs.writeFileSync(path.join(customerBuildDir, 'dist/assets/css/tailwind.css'), cleanCssContent(twContent));
     }
     
-    if (fs.existsSync(path.join(distDir, 'assets/css/main.min.css'))) {
-        fs.copyFileSync(path.join(distDir, 'assets/css/main.min.css'), path.join(customerBuildDir, 'dist/assets/css/main.min.css'));
+    const iconPath = path.join(distDir, 'assets/css/squeditor-icons.css');
+    if (fs.existsSync(iconPath)) {
+        fs.copyFileSync(iconPath, path.join(customerBuildDir, 'src/assets/css/squeditor-icons.css'));
+        fs.copyFileSync(iconPath, path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
+    }
+    
+    const mainCssPath = path.join(distDir, 'assets/css/main.min.css');
+    if (fs.existsSync(mainCssPath)) {
+        let mainContent = fs.readFileSync(mainCssPath, 'utf8');
+        fs.writeFileSync(path.join(customerBuildDir, 'dist/assets/css/main.min.css'), cleanCssContent(mainContent));
     }
 
     // slider.min.css contains the slider library CSS (Splide/Swiper)
@@ -181,11 +296,45 @@ async function createCustomerPackage() {
     if (fs.existsSync(mainScssPath)) {
         let mainScssContent = fs.readFileSync(mainScssPath, 'utf8');
         mainScssContent = mainScssContent.replace(/@import\s+['"]custom['"];\n?/g, '');
-        mainScssContent += `\n// --- CUSTOM SCRIPTS --- (These run last to override themes block cleanly)\n@import 'custom-config';\n@import 'custom';\n`;
+        mainScssContent += `\n// --- CUSTOM SCRIPTS --- (These run last to override themes block cleanly)\n@import 'custom';\n`;
         fs.writeFileSync(mainScssPath, mainScssContent);
 
-        const customConfigContent = `// custom-config.scss\n// Define your theme variable overrides here.\n:root, [class*="theme-"] {\n    // --sq-color-primary: #ff0000;\n}\n`;
-        fs.writeFileSync(path.join(customerScssDir, 'custom-config.scss'), customConfigContent);
+        // Add framework-file headers to protected SCSS files
+        const frameworkFiles = ['_tokens.scss', '_functions.scss', '_theme-engine.scss', 'main.scss'];
+        frameworkFiles.forEach(file => {
+            const filePath = path.join(customerScssDir, file);
+            if (fs.existsSync(filePath)) {
+                let content = fs.readFileSync(filePath, 'utf8');
+                if (!content.startsWith('// ⚠️ FRAMEWORK FILE')) {
+                    content = `// ⚠️ FRAMEWORK FILE — Do not edit. This file will be replaced on updates.\n// To customize colors, edit _config.scss instead.\n${content}`;
+                    fs.writeFileSync(filePath, content);
+                }
+            }
+        });
+
+        // Add headers to framework config files
+        const frameworkConfigs = ['active-components.php', 'active-themes.php', 'theme-entries.php'];
+        frameworkConfigs.forEach(file => {
+            const filePath = path.join(customerConfigDir, file);
+            if (fs.existsSync(filePath)) {
+                let content = fs.readFileSync(filePath, 'utf8');
+                if (!content.includes('⚠️ FRAMEWORK FILE')) {
+                    content = content.replace('<?php', '<?php\n// ⚠️ FRAMEWORK FILE — Do not edit. This file will be replaced on updates.');
+                    fs.writeFileSync(filePath, content);
+                }
+            }
+        });
+
+        // Clean source SCSS theme files to remove font-family forces
+        const themeScssFiles = fs.readdirSync(path.join(customerScssDir, 'themes')).filter(f => f.endsWith('.scss'));
+        themeScssFiles.forEach(f => {
+            const filePath = path.join(customerScssDir, 'themes', f);
+            let content = fs.readFileSync(filePath, 'utf8');
+            // Remove the h1-h6 font-family block
+            const scssFontRegex = /\s*h1,\s*h2,\s*h3,\s*h4,\s*h5,\s*h6\s*\{[^}]*font-family:\s*var\(--sq-font-heading\);?\s*\}/gi;
+            content = content.replace(scssFontRegex, '');
+            fs.writeFileSync(filePath, content);
+        });
     }
 
     fs.mkdirSync(path.join(customerBuildDir, 'src/assets/js'), { recursive: true });
@@ -194,6 +343,18 @@ async function createCustomerPackage() {
     fs.copyFileSync(path.join(distDir, 'assets/js/uikit-components.js'), path.join(customerBuildDir, 'dist/assets/js/uikit-components.js'));
     fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'src/assets/js/main.js'));
     fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'dist/assets/js/main.js'));
+
+    // Copy compiled theme CSS files to customer dist
+    if (config.themes) {
+        Object.keys(config.themes).forEach(themeKey => {
+            const themeCssName = `theme-${themeKey}.min.css`;
+            const themeCssPath = path.join(distDir, 'assets/css', themeCssName);
+            if (fs.existsSync(themeCssPath)) {
+                let themeContent = fs.readFileSync(themeCssPath, 'utf8');
+                fs.writeFileSync(path.join(customerBuildDir, 'dist/assets/css', themeCssName), cleanCssContent(themeContent));
+            }
+        });
+    }
 
     const staticDistPath = path.join(distDir, 'assets/static');
     const staticCustomerSourcePath = path.join(customerBuildDir, 'src/assets/static');
@@ -269,8 +430,8 @@ ${rollupInputs}            },
         preprocessorOptions: {
             scss: {
                 api: 'modern-compiler',
-                silenceDeprecations: ['import', 'legacy-js-api'],
-                additionalData: '@import "/assets/scss/_tokens.scss";',
+                silenceDeprecations: ['import', 'legacy-js-api', 'global-builtin'],
+                additionalData: '@import "/assets/scss/_config.scss"; @import "/assets/scss/_functions.scss"; @import "/assets/scss/_theme-engine.scss"; @import "/assets/scss/_tokens.scss";',
             },
         },
     },
@@ -278,13 +439,13 @@ ${rollupInputs}            },
 `;
     fs.writeFileSync(path.join(customerBuildDir, 'vite.config.js'), viteConfigContent);
 
-    const tailwindConfig = `/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n    darkMode: ['selector', '.sq-theme-dark'],\n    content: [ './src/**/*.html' ],\n    theme: {\n        extend: {\n            colors: {\n                primary: 'var(--sq-color-primary)',\n                secondary: 'var(--sq-color-secondary)',\n                accent: 'var(--sq-color-accent)',\n            },\n            fontFamily: {\n                sans: ['var(--sq-font-sans)'],\n                serif: ['var(--sq-font-serif)'],\n                mono: ['var(--sq-font-mono)'],\n            },\n        },\n    },\n    plugins: [],\n}`;
+    const tailwindConfig = `/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n    darkMode: ['selector', '.sq-theme-dark'],\n    content: [ './src/**/*.html' ],\n    theme: {\n        extend: {\n            colors: {\n                primary: 'rgb(var(--sq-color-primary-rgb) / <alpha-value>)',\n                secondary: 'rgb(var(--sq-color-secondary-rgb) / <alpha-value>)',\n                accent: 'rgb(var(--sq-color-accent-rgb) / <alpha-value>)',\n                muted: 'rgb(var(--sq-color-muted-text-rgb) / <alpha-value>)',\n                light: 'rgb(var(--sq-color-light-rgb) / <alpha-value>)',\n                dark: 'rgb(var(--sq-color-dark-rgb) / <alpha-value>)',\n            },\n            fontFamily: {\n                sans: ['var(--sq-font-sans)'],\n                serif: ['var(--sq-font-serif)'],\n                mono: ['var(--sq-font-mono)'],\n            },\n        },\n    },\n    plugins: [],\n}`;
     fs.writeFileSync(path.join(customerBuildDir, 'tailwind.config.js'), tailwindConfig);
 
     const postcssConfig = `module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}`;
     fs.writeFileSync(path.join(customerBuildDir, 'postcss.config.js'), postcssConfig);
 
-    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. Edit styles in \`src/assets/scss/main.scss\`\n4. Build production assets to \`dist/\`: \`npm run build\`\n`;
+    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. **Colors:** Edit \`src/assets/scss/_config.scss\` — change \`$base-colors\` and \`$base-colors-dark\` maps\n4. **Theme overrides:** Edit files in \`src/assets/scss/themes/\`\n5. **Custom styles:** Add your CSS to \`src/assets/scss/custom.scss\`\n6. Build production assets to \`dist/\`: \`npm run build\`\n\n## File Update Safety\nWhen updating to a new version, these files can be safely replaced (your changes are in \`_config.scss\`, \`themes/\`, and \`custom.scss\` which are yours to keep):\n- \`_tokens.scss\` — auto-generated from \`_config.scss\`\n- \`_functions.scss\` — framework helper functions\n- \`_theme-engine.scss\` — theme generator mixin\n- \`main.scss\` — main import orchestrator\n\n**Never replace:** \`_config.scss\`, \`custom.scss\`, and any \`themes/*.scss\` files you have customized.\n`;
     fs.writeFileSync(path.join(customerBuildDir, 'README.md'), readmeContent);
 
     // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)

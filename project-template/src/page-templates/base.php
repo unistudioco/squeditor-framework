@@ -35,5 +35,9 @@ $cursor_config = $cursor_config ?? ($site['cursor_config'] ?? '');
 <?php if (isset($extra_footer)) echo $extra_footer; ?>
 <?php require __DIR__ . '/transition.php'; ?>
 
+<?php if ($site['demo_mode']): ?>
+    <?php get_template_part('theme-switcher'); ?>
+<?php endif; ?>
+
 </body>
 </html>
