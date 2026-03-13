@@ -7,9 +7,13 @@ const config = require(path.join(projectRoot, 'squeditor.config.js'));
 const fwRoot = path.resolve(projectRoot, config.framework); // resolves ..
 const manifest = require(path.join(fwRoot, 'uikit-manifest.json'));
 const resolvePages = require('./utils/resolve-pages');
+const ui = require('./utils/cli-ui');
 
 
 const selectedComponents = config.components || [];
+
+ui.header('Generating Distribution Files');
+ui.step('Preparing output directories...');
 
 // JS output still relies on concatenation
 const outputJsDir = path.join(projectRoot, config.output.js);
@@ -30,7 +34,7 @@ core.css.forEach(f => scssPaths.add(f));
 selectedComponents.forEach(componentName => {
   const entry = manifest[componentName];
   if (!entry) {
-    console.warn(`[Squeditor] Unknown component in config: "${componentName}" — skipping.`);
+    ui.warning(`Unknown component in config: "${componentName}" — skipping.`);
     return;
   }
   entry.js.forEach(f => jsPaths.add(f));
@@ -48,7 +52,7 @@ jsPaths.forEach(f => {
   if (fs.existsSync(finalPath)) {
     jsBundle += fs.readFileSync(finalPath, 'utf8') + '\n';
   } else {
-    console.warn(`[Squeditor] file not found: ${finalPath}`);
+    ui.warning(`File not found: ${finalPath}`);
   }
 });
 
@@ -77,7 +81,7 @@ scssPaths.forEach(f => {
 fs.writeFileSync(path.join(outputJsDir, 'uikit-components.js'), jsBundle);
 fs.writeFileSync(path.join(outputScssDir, '_uikit_dynamic.scss'), scssImports);
 
-console.log('[Squeditor] ✅ UIkit3 components built successfully.');
+ui.success(`UIkit3 components built: ${selectedComponents.length} components included.`);
 
 // Generate src/config/active-components.php for the style-guide page
 const phpConfigDir = path.join(projectRoot, 'src/config');
@@ -152,7 +156,7 @@ if (fs.existsSync(mainScssPath) && config.themes) {
     fs.writeFileSync(path.join(themesDir, `theme-${themeKey}.scss`), entryContent);
   });
 
-  console.log(`[Squeditor] 🎨 Generated theme entries: ${Object.keys(config.themes).map(k => 'theme-' + k + '.scss').join(', ')}`);
+  ui.step(`Generated theme entries for: ${Object.keys(config.themes).join(', ')}`, 'css');
 }
 
 // Generate Dynamic Slider Config Import
@@ -165,7 +169,7 @@ if (sliderConfig.library === 'swiper') {
     sliderImportCode += 'import \'./modules/splide-init.js\';\n';
 }
 fs.writeFileSync(dynamicSliderPath, sliderImportCode);
-console.log(`[Squeditor] 🎠 Selected slider library: ${sliderConfig.library || 'none'}`);
+ui.step(`Slider library: ${sliderConfig.library || 'none'}`, 'vibrant');
 
 // Copy slider library CSS to src/assets/css/slider.min.css
 // This keeps the CSS separate from main.js and gives it a clear, descriptive filename
@@ -175,7 +179,7 @@ if (sliderConfig.library === 'splide') {
     if (fs.existsSync(splideCssPath)) {
         fs.copyFileSync(splideCssPath, sliderCssDest);
     } else {
-        console.warn('[Squeditor] ⚠️ Splide CSS not found at expected path.');
+        ui.warning('Splide CSS not found at expected path.');
         fs.writeFileSync(sliderCssDest, '/* Splide CSS not found */\n');
     }
 } else if (sliderConfig.library === 'swiper') {

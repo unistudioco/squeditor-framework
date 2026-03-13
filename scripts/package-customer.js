@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const ui = require('./utils/cli-ui');
 
 const projectRoot = process.cwd();
 const config = require(path.join(projectRoot, 'squeditor.config.js'));
@@ -120,7 +121,7 @@ async function walkAndProcessMedia(currentSrc, currentDest, baseDir) {
 }
 
 async function createCustomerPackage() {
-    console.log('[Squeditor] 📦 Assembling Customer Package...');
+    ui.header('Assembling Customer Package');
 
     if (path.resolve(customerBuildDir) === path.resolve(projectRoot)) {
         console.error(`[Squeditor] 🚨 CRITICAL ERROR: customerBuildDir resolves to the active project workspace root!`);
@@ -130,7 +131,7 @@ async function createCustomerPackage() {
 
     // Clean existing build directory to prevent stale assets / duplicates
     if (fs.existsSync(customerBuildDir)) {
-        console.log(`   - Cleaning existing customer package directory...`);
+        ui.step('Cleaning existing customer package directory...');
         fs.rmSync(customerBuildDir, { recursive: true, force: true });
     }
 
@@ -139,7 +140,7 @@ async function createCustomerPackage() {
             try {
                 fs.mkdirSync(dir, { recursive: true });
             } catch (e) {
-                console.warn(`   - ⚠️  Warning: Could not create directory ${dir}.`);
+                // Silenced
             }
         }
     }
@@ -186,20 +187,11 @@ async function createCustomerPackage() {
         return content;
     }
 
-    function safeMkdir(dir) {
-        if (!fs.existsSync(dir)) {
-            try {
-                fs.mkdirSync(dir, { recursive: true });
-            } catch (e) {
-                console.warn(`   - ⚠️  Warning: Could not create directory ${dir}.`);
-            }
-        }
-    }
-
     safeMkdir(path.join(customerBuildDir, 'dist/assets'));
 
-    console.log('   - Copying compiled HTML to dist/ and src/');
-    console.log('   - Cleaning HTML snapshots (selective themes & switcher removal)');
+    // 1. Copy Compiled HTML
+    ui.step('Copying compiled HTML to dist/ and src/...');
+    // Silenced: console.log('   - Cleaning HTML snapshots (selective themes & switcher removal)');
     const distHtmlFiles = fs.readdirSync(distDir).filter(file => file.endsWith('.html'));
     safeMkdir(path.join(customerBuildDir, 'src'));
 
@@ -267,7 +259,8 @@ async function createCustomerPackage() {
         fs.writeFileSync(path.join(customerBuildDir, 'src', file), devHtml);
     });
 
-    console.log('   - Copying theme configurations to src/config');
+    // 3. Copy Theme Configs
+    ui.step('Copying theme configurations to src/config...');
     const customerConfigDir = path.join(customerBuildDir, 'src/config');
     if (!fs.existsSync(customerConfigDir)) {
         fs.mkdirSync(customerConfigDir, { recursive: true });
@@ -286,7 +279,8 @@ async function createCustomerPackage() {
         }
     });
 
-    console.log('   - Copying necessary developer source files to src/assets');
+    // 4. Copy Developer Assets
+    ui.step('Copying developer source files to src/assets...');
     fs.mkdirSync(path.join(customerBuildDir, 'src/assets/css'), { recursive: true });
     // Also copy dist production files
     fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/css'), { recursive: true });
@@ -398,7 +392,8 @@ async function createCustomerPackage() {
         fs.cpSync(staticCustomerSourcePath, staticCustomerDistPath, { recursive: true });
     }
 
-    console.log('   - Generating lean package.json and vite.config.js');
+    // 5. Generate package.json and vite.config.js
+    ui.step('Generating lean package.json and vite.config.js...');
     const originalPkg = require(path.join(projectRoot, 'package.json'));
     const customerPkg = {
         name: originalPkg.name,
@@ -504,22 +499,22 @@ ${rollupInputs}            },
 
     // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)
     try {
-        console.log(`   - Formatting customer HTML files with Prettier...`);
+        ui.step('Formatting customer HTML files with Prettier...', 'pretty');
         const prettierBin = findPrettier();
         // Use inherit stdio for better error visibility
-        execSync(`"${prettierBin}" --write "src/**/*.html" "dist/**/*.html"`, { cwd: customerBuildDir, stdio: 'inherit' });
+        execSync(`"${prettierBin}" --write "src/**/*.html" "dist/**/*.html"`, { cwd: customerBuildDir, stdio: 'ignore' });
     } catch (e) {
         console.warn(`   - ⚠️  Prettier formatting skipped or errored.`);
     }
 
-    console.log(`[Squeditor] 📦 Zipping Customer Package to ${zipName}...`);
+    ui.step(`Zipping Customer Package to ${zipName}...`, 'package');
     try {
         // Explicitly clean up any .DS_Store files that might have been created by the OS
         execSync(`find "${customerBuildDir}" -name ".DS_Store" -delete`, { stdio: 'ignore' });
-        execSync(`cd "${customerBuildDir}" && zip -r -9 "${zipPath}" . -x "*.DS_Store" -x "*/.DS_Store"`, { stdio: 'ignore' });
-        console.log(`[Squeditor] ✅ ZIP created: ${zipName}`);
+        execSync(`cd "${customerBuildDir}" && zip -q -r -9 "${zipPath}" . -x "*.DS_Store" -x "*/.DS_Store"`, { stdio: 'ignore' });
+        ui.success(`ZIP created: ${zipName}`);
     } catch (e) {
-        console.error(`[Squeditor] ❌ Failed to create ZIP archive.`, e.message);
+        ui.error(`Failed to create ZIP archive: ${e.message}`);
     }
 }
 

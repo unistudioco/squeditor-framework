@@ -7,6 +7,7 @@ const projectRoot = process.cwd();
 const config = require(path.join(projectRoot, 'squeditor.config.js'));
 const resolvePages = require('./utils/resolve-pages');
 const getAvailablePort = require('./get-port');
+const ui = require('./utils/cli-ui');
 
 const { outputDir, rewriteExtension } = config.snapshot;
 const distDir = path.join(projectRoot, outputDir);
@@ -82,11 +83,15 @@ async function runSnapshot() {
         // Wait for PHP server to be ready instead of a fixed timeout
         await waitForServer(snapshotBaseUrl);
 
-        console.log('[Squeditor] 📸 Starting snapshot...');
+        ui.header('Generating Static Snapshots');
+        ui.step('Server ready, starting snapshot...', 'camera');
 
         // snapshot.pages is the AUTHORITATIVE list of pages to capture
         const allPages = resolvePages(config.snapshot.pages || ['*'], projectRoot);
         const themeLookup = buildThemeLookup();
+
+        let completed = 0;
+        const total = allPages.length;
 
         for (const pagePath of allPages) {
             try {
@@ -94,7 +99,8 @@ async function runSnapshot() {
                 const themeInfo = themeLookup[pagePath] || { themeKey: 'default', distSubfolder: '' };
                 const { themeKey, distSubfolder } = themeInfo;
 
-                console.log(`[Squeditor] Fetching ${pagePath} (Theme: ${themeKey})...`);
+                completed++;
+                ui.progressBar(completed, total, `Fetching page ${completed}/${total}: ${pagePath}`);
 
                 // Resolve fetch URI: '/' -> '/index.php'
                 let fetchUri = pagePath;
@@ -125,7 +131,7 @@ async function runSnapshot() {
                 fs.mkdirSync(path.dirname(fullPath), { recursive: true });
                 fs.writeFileSync(fullPath, cleanedHtml);
             } catch (err) {
-                console.error(`[Squeditor] Failed to snapshot ${pagePath}:`, err.message);
+                ui.error(`Failed to snapshot ${pagePath}: ${err.message}`);
             }
         }
 
@@ -133,24 +139,24 @@ async function runSnapshot() {
         try {
             const prettierBin = findPrettier();
             const prettierConfig = path.join(projectRoot, '.prettierrc');
-            console.log(`[Squeditor] 💅 Formatting dist HTML with Prettier...`);
-            console.log(`[Squeditor] Run: ${prettierBin} --write "**/*.html" --config ${prettierConfig} --cwd ${distDir}`);
+            ui.step('Formatting HTML with Prettier...', 'pretty');
+            // We use relative globs and explicitly set cwd to the dist folder to be safer with Prettier version behavior
             execSync(`"${prettierBin}" --write "**/*.html" --config "${prettierConfig}"`, { 
-                stdio: 'inherit',
+                stdio: 'ignore', // SILENT PRETTIER
                 cwd: distDir 
             });
         } catch (err) {
-            console.warn('[Squeditor] ⚠️  Prettier formatting skipped or errored.', err.message);
+            ui.warning(`Prettier formatting issue: ${err.message}`);
         }
 
-        console.log('[Squeditor] 🏁 Snapshot complete.');
+        ui.success('Snapshot complete.');
     } finally {
         phpServer.kill();
     }
 }
 
 runSnapshot().catch(err => {
-    console.error('[Squeditor] ❌ Snapshot failed:', err.message);
+    ui.error(`Snapshot failed: ${err.message}`);
     process.exit(1);
 });
 
