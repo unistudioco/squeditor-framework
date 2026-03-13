@@ -108,10 +108,11 @@ async function runSnapshot() {
                 fs.mkdirSync(themeDistDir, { recursive: true });
 
                 const rewrittenHtml = rewriteLinks(html, savePath, distSubfolder);
+                const cleanedHtml = stripDevContent(rewrittenHtml);
 
                 const fullPath = path.join(themeDistDir, savePath);
                 fs.mkdirSync(path.dirname(fullPath), { recursive: true });
-                fs.writeFileSync(fullPath, rewrittenHtml);
+                fs.writeFileSync(fullPath, cleanedHtml);
             } catch (err) {
                 console.error(`[Squeditor] Failed to snapshot ${pagePath}:`, err.message);
             }
@@ -172,4 +173,12 @@ function rewriteLinks(html, savePath, distSubfolder) {
     }
     
     return result;
+}
+
+function stripDevContent(html) {
+    // 1. Strip "DEV ONLY" blocks
+    // Supports //, /* */, and <!-- style comments
+    const devOnlyJs = /(\/\/\s*DEV\s+ONLY\s+START|\/\*\s*DEV\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEV\s+ONLY\s+END|\/\*\s*DEV\s+ONLY\s+END\s*\*\/)/gi;
+    const devOnlyHtml = /<!--\s*DEV\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEV\s+ONLY\s+END\s*-->/gi;
+    return html.replace(devOnlyJs, '').replace(devOnlyHtml, '');
 }

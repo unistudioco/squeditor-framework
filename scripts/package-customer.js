@@ -128,6 +128,12 @@ async function createCustomerPackage() {
         process.exit(1);
     }
 
+    // Clean existing build directory to prevent stale assets / duplicates
+    if (fs.existsSync(customerBuildDir)) {
+        console.log(`   - Cleaning existing customer package directory...`);
+        fs.rmSync(customerBuildDir, { recursive: true, force: true });
+    }
+
     function safeMkdir(dir) {
         if (!fs.existsSync(dir)) {
             try {
@@ -138,10 +144,30 @@ async function createCustomerPackage() {
         }
     }
 
+    // General function to strip conditional content based on comment markers
+    function stripConditionalContent(content, isCustomerPackage = true) {
+        // 1. Strip "DEV ONLY" blocks (always stripped in dist/customer builds)
+        // Supports //, /* */, and <!-- style comments
+        const devOnlyJs = /(\/\/\s*DEV\s+ONLY\s+START|\/\*\s*DEV\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEV\s+ONLY\s+END|\/\*\s*DEV\s+ONLY\s+END\s*\*\/)/gi;
+        const devOnlyHtml = /<!--\s*DEV\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEV\s+ONLY\s+END\s*-->/gi;
+        content = content.replace(devOnlyJs, '').replace(devOnlyHtml, '');
+
+        // 2. Strip "DEMO MODE ONLY" blocks if we are building the customer package
+        if (isCustomerPackage) {
+            const demoOnlyJs = /(\/\/\s*DEMO\s+MODE\s+ONLY\s+START|\/\*\s*DEMO\s+MODE\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEMO\s+MODE\s+ONLY\s+END|\/\*\s*DEMO\s+MODE\s+ONLY\s+END\s*\*\/)/gi;
+            const demoOnlyHtml = /<!--\s*DEMO\s+MODE\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEMO\s+MODE\s+ONLY\s+END\s*-->/gi;
+            content = content.replace(demoOnlyJs, '').replace(demoOnlyHtml, '');
+        }
+
+        return content;
+    }
+
     // CSS cleaning function to remove demo-specific selectors
-    function cleanCssContent(content) {
+    function cleanCssContent(content, isCustomerPackage = true) {
+        // Strip general conditional blocks first
+        content = stripConditionalContent(content, isCustomerPackage);
+
         // 1. Remove high-specificity typography overrides (demo mode stuff)
-        // Matches selectors like "html body h1, ... { ... }" that use var(--sq-font-heading) or !important
         const highSpecRegex = /html\s+body\s+h[1-6][^}]*\{[^}]*var\(--sq-font-heading\)[^}]*\}/gi;
         content = content.replace(highSpecRegex, '');
 
@@ -150,8 +176,6 @@ async function createCustomerPackage() {
         content = content.replace(switcherStylesRegex, '');
 
         // 3. Remove theme-level font-family forces if requested (as per user feedback)
-        // Matches ".theme-name h1, ... { font-family: var(--sq-font-heading); }"
-        // and also the complex selector provided by the user
         const themeFontRegex = /\.theme-[a-z0-9-]+\s+h[1-6][^}]*\{[^}]*font-family:\s*var\(--sq-font-heading\)[^}]*\}/gi;
         content = content.replace(themeFontRegex, '');
 
@@ -196,7 +220,9 @@ async function createCustomerPackage() {
 
     distHtmlFiles.forEach(file => {
         let htmlContent = fs.readFileSync(path.join(distDir, file), 'utf8');
-        
+        // Apply general conditional content stripping (both Dev and Demo blocks)
+        htmlContent = stripConditionalContent(htmlContent, true);
+
         // 1. Remove Theme Switcher Block (div + script + styles + comments)
         // Aggressively target the isolation style block
         htmlContent = htmlContent.replace(/<style>[\s\S]*?\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
@@ -275,6 +301,12 @@ async function createCustomerPackage() {
     if (fs.existsSync(iconPath)) {
         fs.copyFileSync(iconPath, path.join(customerBuildDir, 'src/assets/css/squeditor-icons.css'));
         fs.copyFileSync(iconPath, path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
+    }
+
+    const fontsCssPath = path.join(distDir, 'assets/css/fonts.css');
+    if (fs.existsSync(fontsCssPath)) {
+        fs.copyFileSync(fontsCssPath, path.join(customerBuildDir, 'src/assets/css/fonts.css'));
+        fs.copyFileSync(fontsCssPath, path.join(customerBuildDir, 'dist/assets/css/fonts.css'));
     }
     
     const mainCssPath = path.join(distDir, 'assets/css/main.min.css');
@@ -421,6 +453,13 @@ ${rollupInputs}            },
                 assetFileNames: (assetInfo) => {
                     const name = assetInfo.names ? assetInfo.names[0] : assetInfo.name;
                     if (name.endsWith('.css')) return 'assets/css/[name]-[hash][extname]';
+                    
+                    // Route fonts to their static folder while preserving subfolders if possible
+                    const isFont = name.match(/\.(woff2?|eot|ttf|otf)$/) || name.includes('squeditor-icons.svg');
+                    if (isFont) {
+                        return 'assets/static/fonts/[name][extname]';
+                    }
+                    
                     return 'assets/[name]-[hash][extname]';
                 },
             },

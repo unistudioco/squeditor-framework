@@ -142,6 +142,14 @@ async function run() {
             fs.mkdirSync(path.dirname(uikitDest), { recursive: true });
             fs.copyFileSync(uikitJs, uikitDest);
         }
+
+        const fontsCss = path.join(projectRoot, 'src/assets/css/fonts.css');
+        const fontsDest = path.join(projectRoot, config.snapshot.outputDir, 'assets/css/fonts.css');
+        if (fs.existsSync(fontsCss)) {
+            fs.mkdirSync(path.dirname(fontsDest), { recursive: true });
+            fs.copyFileSync(fontsCss, fontsDest);
+            console.log('[Squeditor] 📎 Copied fonts.css → dist/assets/css/');
+        }
     } else {
         console.warn(`[Squeditor] ⚠️ Source directory for static assets not found: ${srcDir}`);
     }
