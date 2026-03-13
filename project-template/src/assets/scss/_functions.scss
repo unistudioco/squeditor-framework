@@ -2,6 +2,7 @@
 @use "sass:math";
 @use "sass:meta";
 @use "sass:color";
+@use "sass:string";
 
 // Calculate relative luminance based on WCAG formulas
 @function luminance($color) {
@@ -78,4 +79,18 @@
     @else {
         @return $dark;
     }
+}
+
+// Extract raw RGB channels for Tailwind opacity modifier support
+// Usage: --sq-color-foo-rgb: #{sq-rgb($color-foo)};
+// Then in Tailwind config: 'rgb(var(--sq-color-foo-rgb) / <alpha-value>)'
+// Output must be SPACE-separated (e.g. "244 241 235") for rgb() slash-alpha syntax
+@function sq-rgb($color) {
+    @if meta.type-of($color) != 'color' {
+        @return string.unquote('0 0 0'); // Fallback
+    }
+    $r: color.channel($color, "red", $space: rgb);
+    $g: color.channel($color, "green", $space: rgb);
+    $b: color.channel($color, "blue", $space: rgb);
+    @return string.unquote('#{$r} #{$g} #{$b}');
 }

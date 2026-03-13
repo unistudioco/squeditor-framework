@@ -11,17 +11,26 @@ $sq-color-heading-text: #272164;
 
 .theme-two, .theme-two .sq-theme-light {
     --sq-color-primary: #{$sq-color-primary};
+    --sq-color-primary-rgb: #{sq-rgb($sq-color-primary)};
     --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-secondary: #{$sq-color-secondary};
+    --sq-color-secondary-rgb: #{sq-rgb($sq-color-secondary)};
     --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-accent: #{$sq-color-accent};
+    --sq-color-accent-rgb: #{sq-rgb($sq-color-accent)};
     --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-muted-text: #{$sq-color-muted-text};
+    --sq-color-muted-text-rgb: #{sq-rgb($sq-color-muted-text)};
     --sq-color-muted-bg: #{$sq-color-muted-bg};
+    --sq-color-muted-bg-rgb: #{sq-rgb($sq-color-muted-bg)};
     --sq-color-light: #{$sq-color-light};
+    --sq-color-light-rgb: #{sq-rgb($sq-color-light)};
     --sq-color-body-bg: #{$sq-color-body-bg};
+    --sq-color-body-bg-rgb: #{sq-rgb($sq-color-body-bg)};
     --sq-color-body-text: #{$sq-color-body-text};
+    --sq-color-body-text-rgb: #{sq-rgb($sq-color-body-text)};
     --sq-color-heading-text: #{$sq-color-heading-text};
+    --sq-color-heading-text-rgb: #{sq-rgb($sq-color-heading-text)};
     --sq-font-sans: 'TASA Orbiter', sans-serif;
     --sq-font-heading: 'TASA Orbiter', sans-serif;
     --sq-radius-lg: 32px;
@@ -68,25 +77,26 @@ $sq-color-heading-text: #272164;
     $sq-color-heading-text: #ffffff;
 
     --sq-color-primary: #{$sq-color-primary-dark};
+    --sq-color-primary-rgb: #{sq-rgb($sq-color-primary-dark)};
     --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-secondary: #{$sq-color-secondary-dark};
+    --sq-color-secondary-rgb: #{sq-rgb($sq-color-secondary-dark)};
     --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-accent: #{$sq-color-accent-dark};
-    --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-
-    --sq-color-primary: #{$sq-color-primary-dark};
-    --sq-color-primary-contrast: #{sq-color-contrast($sq-color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-secondary: #{$sq-color-secondary-dark};
-    --sq-color-secondary-contrast: #{sq-color-contrast($sq-color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
-    --sq-color-accent: #{$sq-color-accent-dark};
+    --sq-color-accent-rgb: #{sq-rgb($sq-color-accent-dark)};
     --sq-color-accent-contrast: #{sq-color-contrast($sq-color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
 
     --sq-color-muted-text: #{$sq-color-muted-text};
+    --sq-color-muted-text-rgb: #{sq-rgb($sq-color-muted-text)};
     --sq-color-muted-bg: #{$sq-color-muted-bg};
+    --sq-color-muted-bg-rgb: #{sq-rgb($sq-color-muted-bg)};
 
     --sq-color-body-bg: #{$sq-color-body-bg};
+    --sq-color-body-bg-rgb: #{sq-rgb($sq-color-body-bg)};
     --sq-color-body-text: #{$sq-color-body-text};
+    --sq-color-body-text-rgb: #{sq-rgb($sq-color-body-text)};
     --sq-color-heading-text: #{$sq-color-heading-text};
+    --sq-color-heading-text-rgb: #{sq-rgb($sq-color-heading-text)};
 
     --sq-sticky-bg: #{$sq-color-muted-bg};
     --sq-sticky-text: #{$sq-color-body-text};

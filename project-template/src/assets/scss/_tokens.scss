@@ -64,19 +64,30 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
 :root, .sq-theme-light {
     // Brand colors
     --sq-color-primary: #{$color-primary};
+    --sq-color-primary-rgb: #{sq-rgb($color-primary)};
     --sq-color-primary-contrast: #{sq-color-contrast($color-primary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-secondary: #{$color-secondary};
+    --sq-color-secondary-rgb: #{sq-rgb($color-secondary)};
     --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-accent: #{$color-accent};
+    --sq-color-accent-rgb: #{sq-rgb($color-accent)};
     --sq-color-accent-contrast: #{sq-color-contrast($color-accent, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-white: #{$color-white};
+    --sq-color-white-rgb: #{sq-rgb($color-white)};
     --sq-color-muted-text: #{$color-muted-text};
+    --sq-color-muted-text-rgb: #{sq-rgb($color-muted-text)};
     --sq-color-muted-bg: #{$color-muted-bg};
+    --sq-color-muted-bg-rgb: #{sq-rgb($color-muted-bg)};
     --sq-color-light: #{$color-light};
+    --sq-color-light-rgb: #{sq-rgb($color-light)};
     --sq-color-dark: #{$color-dark};
+    --sq-color-dark-rgb: #{sq-rgb($color-dark)};
     --sq-color-body-bg: #{$color-body-bg};
+    --sq-color-body-bg-rgb: #{sq-rgb($color-body-bg)};
     --sq-color-body-text: #{$color-body-text};
+    --sq-color-body-text-rgb: #{sq-rgb($color-body-text)};
     --sq-color-heading-text: #{$color-heading-text};
+    --sq-color-heading-text-rgb: #{sq-rgb($color-heading-text)};
     --sq-color-border: #{$color-border};
 
     // --- Component Tokens ---
@@ -169,18 +180,26 @@ $color-border: rgba(138, 138, 138, 0.196) !default;
 .sq-theme-dark {
     // Brand colors (Dark Mode Specific Overrides)
     --sq-color-primary: #{$color-primary-dark};
+    --sq-color-primary-rgb: #{sq-rgb($color-primary-dark)};
     --sq-color-primary-contrast: #{sq-color-contrast($color-primary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-secondary: #{$color-secondary-dark};
+    --sq-color-secondary-rgb: #{sq-rgb($color-secondary-dark)};
     --sq-color-secondary-contrast: #{sq-color-contrast($color-secondary-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
     --sq-color-accent: #{$color-accent-dark};
+    --sq-color-accent-rgb: #{sq-rgb($color-accent-dark)};
     --sq-color-accent-contrast: #{sq-color-contrast($color-accent-dark, $sq-contrast-light-text, $sq-contrast-dark-text, $sq-min-contrast-ratio)};
 
     // Standard structural adjustments
     --sq-color-body-bg: #19191b;
+    --sq-color-body-bg-rgb: #{sq-rgb(#19191b)};
     --sq-color-body-text: #F1F5F9;
+    --sq-color-body-text-rgb: #{sq-rgb(#F1F5F9)};
     --sq-color-heading-text: #ffffff;
+    --sq-color-heading-text-rgb: #{sq-rgb(#ffffff)};
     --sq-color-muted-text: #c7cacd;
+    --sq-color-muted-text-rgb: #{sq-rgb(#c7cacd)};
     --sq-color-muted-bg: #272729;
+    --sq-color-muted-bg-rgb: #{sq-rgb(#272729)};
 
     // Buttons
     --sq-btn-default-bg: var(--sq-color-light);

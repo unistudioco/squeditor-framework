@@ -19,12 +19,19 @@ module.exports = {
                 padding: '1rem', // 16px each side = 32px gutter (--bs-gutter-x)
             },
             colors: {
-                primary: 'var(--sq-color-primary)',
-                secondary: 'var(--sq-color-secondary)',
-                accent: 'var(--sq-color-accent)',
+                primary: 'rgb(var(--sq-color-primary-rgb) / <alpha-value>)',
+                secondary: 'rgb(var(--sq-color-secondary-rgb) / <alpha-value>)',
+                accent: 'rgb(var(--sq-color-accent-rgb) / <alpha-value>)',
+                body: 'rgb(var(--sq-color-body-bg-rgb) / <alpha-value>)',
+                muted: 'rgb(var(--sq-color-muted-bg-rgb) / <alpha-value>)',
                 'transition-from': 'var(--sq-page-transition-from)',
                 'transition-via': 'var(--sq-page-transition-via)',
                 'transition-to': 'var(--sq-page-transition-to)',
+            },
+            textColor: {
+                heading: 'rgb(var(--sq-color-heading-text-rgb) / <alpha-value>)',
+                body: 'rgb(var(--sq-color-body-text-rgb) / <alpha-value>)',
+                muted: 'rgb(var(--sq-color-muted-text-rgb) / <alpha-value>)',
             },
             fontFamily: {
                 sans: ['var(--sq-font-sans)'],
