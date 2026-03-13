@@ -57,6 +57,17 @@ async function runSnapshot() {
     const fwRoot = path.resolve(projectRoot, config.framework);
     const devRouterPath = path.join(fwRoot, 'scripts/dev-router.php');
 
+    function findPrettier() {
+        const localPrettier = path.join(projectRoot, 'node_modules/.bin/prettier');
+        if (fs.existsSync(localPrettier)) return localPrettier;
+        
+        // Check framework node_modules as fallback
+        const fwPrettier = path.join(fwRoot, 'node_modules/.bin/prettier');
+        if (fs.existsSync(fwPrettier)) return fwPrettier;
+        
+        return 'prettier'; // Fallback to global if all else fails
+    }
+
     // Start PHP built-in server WITH the dev-router
     const phpServer = spawn('php', [
         '-S', `127.0.0.1:${snapshotPort}`,
@@ -120,10 +131,16 @@ async function runSnapshot() {
 
         // Format all generated HTML with Prettier
         try {
-            console.log('[Squeditor] 💅 Formatting dist HTML with Prettier...');
-            execSync(`npx prettier --write "${outputDir}/**/*.html" --print-width 10000 --tab-width 4`, { cwd: projectRoot, stdio: 'ignore' });
-        } catch (e) {
-            console.warn('[Squeditor] ⚠️  Prettier formatting skipped (not installed or errored).');
+            const prettierBin = findPrettier();
+            const prettierConfig = path.join(projectRoot, '.prettierrc');
+            console.log(`[Squeditor] 💅 Formatting dist HTML with Prettier...`);
+            console.log(`[Squeditor] Run: ${prettierBin} --write "**/*.html" --config ${prettierConfig} --cwd ${distDir}`);
+            execSync(`"${prettierBin}" --write "**/*.html" --config "${prettierConfig}"`, { 
+                stdio: 'inherit',
+                cwd: distDir 
+            });
+        } catch (err) {
+            console.warn('[Squeditor] ⚠️  Prettier formatting skipped or errored.', err.message);
         }
 
         console.log('[Squeditor] 🏁 Snapshot complete.');

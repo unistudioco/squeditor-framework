@@ -224,10 +224,11 @@ async function createCustomerPackage() {
         htmlContent = stripConditionalContent(htmlContent, true);
 
         // 1. Remove Theme Switcher Block (div + script + styles + comments)
-        // Aggressively target the isolation style block
-        htmlContent = htmlContent.replace(/<style>[\s\S]*?\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
-        // Target the switcher floating component
-        htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->[\s\S]*?<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
+        // Aggressively target the isolation style block - MUST be anchored to the start of the style content to avoid greedy matching across multiple style tags
+        htmlContent = htmlContent.replace(/<style>\s*\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
+        // Target the switcher floating component - Combine comment and div to be precise
+        htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->\s*<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
+        // Fallback for cases where comment might have been stripped or separated
         htmlContent = htmlContent.replace(/<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
         htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->/g, '');
 
@@ -487,12 +488,28 @@ ${rollupInputs}            },
     const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. **Colors:** Edit \`src/assets/scss/_config.scss\` — change \`$base-colors\` and \`$base-colors-dark\` maps\n4. **Theme overrides:** Edit files in \`src/assets/scss/themes/\`\n5. **Custom styles:** Add your CSS to \`src/assets/scss/custom.scss\`\n6. Build production assets to \`dist/\`: \`npm run build\`\n\n## File Update Safety\nWhen updating to a new version, these files can be safely replaced (your changes are in \`_config.scss\`, \`themes/\`, and \`custom.scss\` which are yours to keep):\n- \`_tokens.scss\` — auto-generated from \`_config.scss\`\n- \`_functions.scss\` — framework helper functions\n- \`_theme-engine.scss\` — theme generator mixin\n- \`main.scss\` — main import orchestrator\n\n**Never replace:** \`_config.scss\`, \`custom.scss\`, and any \`themes/*.scss\` files you have customized.\n`;
     fs.writeFileSync(path.join(customerBuildDir, 'README.md'), readmeContent);
 
+    // Helper to find the prettier executable in the main project
+    function findPrettier() {
+        const localPrettier = path.join(projectRoot, 'node_modules', '.bin', 'prettier');
+        if (fs.existsSync(localPrettier)) {
+            return localPrettier;
+        }
+        // Fallback to framework node_modules if projectRoot one missing (rare but possible in some setups)
+        const fwPrettier = path.join(projectRoot, config.framework, '../node_modules/.bin/prettier');
+        if (fs.existsSync(fwPrettier)) {
+            return fwPrettier;
+        }
+        return 'npx prettier';
+    }
+
     // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)
     try {
-        console.log('   - Formatting customer HTML files with Prettier...');
-        execSync('npx prettier --write "src/**/*.html" "dist/**/*.html" --print-width 10000 --tab-width 4', { cwd: customerBuildDir, stdio: 'ignore' });
+        console.log(`   - Formatting customer HTML files with Prettier...`);
+        const prettierBin = findPrettier();
+        // Use inherit stdio for better error visibility
+        execSync(`"${prettierBin}" --write "src/**/*.html" "dist/**/*.html"`, { cwd: customerBuildDir, stdio: 'inherit' });
     } catch (e) {
-        console.warn('   - ⚠️  Prettier formatting skipped.');
+        console.warn(`   - ⚠️  Prettier formatting skipped or errored.`);
     }
 
     console.log(`[Squeditor] 📦 Zipping Customer Package to ${zipName}...`);
