@@ -14,6 +14,7 @@
     --sq-heading-font-weight: #{$sq-heading-font-weight};
     --sq-heading-line-height: #{$sq-heading-line-height};
     --sq-heading-letter-spacing: #{$sq-heading-letter-spacing};
+    --sq-heading-text-transform: #{$sq-heading-text-transform};
 
     // Spacing scale
     @each $key, $val in $sq-spacing {

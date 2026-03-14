@@ -23,33 +23,34 @@ h6,
 .btn {
     font-family: var(--sq-font-heading);
     color: var(--sq-color-heading-text);
-    font-weight: 600;
+    font-weight: var(--sq-heading-font-weight, 600);
     line-height: var(--sq-heading-line-height, 1.2);
     letter-spacing: var(--sq-heading-letter-spacing, normal);
+    text-transform: var(--sq-heading-text-transform, unset);
 }
 
 h1 {
-    @apply text-4xl lg:text-5xl;
+    @apply text-h2 md:text-h1 lg:text-display-6;
 }
 
 h2 {
-    @apply text-3xl lg:text-4xl;
+    @apply text-h3 md:text-h2 lg:text-display-6;
 }
 
 h3 {
-    @apply text-2xl lg:text-3xl;
+    @apply text-h4 md:text-h3;
 }
 
 h4 {
-    @apply text-xl lg:text-2xl;
+    @apply text-h5;
 }
 
 h5 {
-    @apply text-lg lg:text-xl;
+    @apply text-h6;
 }
 
 h6 {
-    @apply text-base lg:text-lg;
+    @apply text-sm uppercase tracking-wider;
 }
 
 .text-muted {

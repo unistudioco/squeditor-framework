@@ -23,21 +23,46 @@ $cursor_config = $cursor_config ?? ($site['cursor_config'] ?? '');
 ?>
 <body class="<?= htmlspecialchars($body_class) ?>" <?= $body_attr ?? '' ?> data-sq-transition="<?= htmlspecialchars($site['page_transition'] ?? 'curve') ?>" <?php if ($enable_cursor): ?>data-sq-cursor="<?= htmlspecialchars($cursor_config) ?>"<?php endif; ?>>
 
-  <?php get_template_part('header', $header_args ?? []); ?>
+    <!-- Page Wrapper -->
+    <div id="page-wrapper" class="sq-page-wrapper <?= htmlspecialchars($wrapper_class ?? 'relative overflow-clip') ?>">
 
-  <main id="main-content">
-    <?php echo $content ?? ''; ?>
-  </main>
+        <?php get_template_part('header', $header_args ?? []); ?>
 
-  <?php get_template_part('footer', $footer_args ?? []); ?>
+        <!-- Main Content -->
+        <main id="main-content" class="sq-main-content <?= htmlspecialchars($main_class ?? 'relative z-20 bg-body') ?>">
+            <?php echo $content ?? ''; ?>
+        </main>
 
-<?php require __DIR__ . '/body-scripts.php'; ?>
-<?php if (isset($extra_footer)) echo $extra_footer; ?>
-<?php require __DIR__ . '/transition.php'; ?>
+        <?php get_template_part('footer', $footer_args ?? []); ?>
 
-<?php if ($site['demo_mode']): ?>
-    <?php get_template_part('theme-switcher'); ?>
-<?php endif; ?>
+    </div>
+
+    <?php if (isset($extra_footer)) echo $extra_footer; ?>
+    <?php require __DIR__ . '/offcanvas.php'; ?>
+    
+    <?php require __DIR__ . '/transition.php'; ?>
+
+    <?php if ($site['demo_mode']): ?>
+        <?php get_template_part('theme-switcher'); ?>
+    <?php endif; ?>
+
+    <?php require __DIR__ . '/body-scripts.php'; ?>
+
+    <!-- FOUC Prevention Script for Dark Mode -->
+    <script>
+        (function () {
+            try {
+                var schema = localStorage.getItem('sq_schema');
+                if (schema === 'dark') {
+                    document.body.classList.remove('sq-theme-light');
+                    document.body.classList.add('sq-theme-dark');
+                } else if (schema === 'light') {
+                    document.body.classList.remove('sq-theme-dark');
+                    document.body.classList.add('sq-theme-light');
+                }
+            } catch (e) {}
+        })();
+    </script>
 
 </body>
 </html>
