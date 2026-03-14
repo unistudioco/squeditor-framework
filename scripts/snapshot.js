@@ -2,9 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const { spawn, execSync } = require('child_process');
-
-const projectRoot = process.cwd();
-const config = require(path.join(projectRoot, 'squeditor.config.js'));
+const { projectRoot, fwRoot, config, findPrettier, stripDevContent } = require('./utils/core');
 const resolvePages = require('./utils/resolve-pages');
 const getAvailablePort = require('./get-port');
 const ui = require('./utils/cli-ui');
@@ -55,19 +53,8 @@ async function runSnapshot() {
     const snapshotBaseUrl = `http://127.0.0.1:${snapshotPort}`;
 
     // Resolve dev-router path for proper .html and extensionless URL handling
-    const fwRoot = path.resolve(projectRoot, config.framework);
     const devRouterPath = path.join(fwRoot, 'scripts/dev-router.php');
 
-    function findPrettier() {
-        const localPrettier = path.join(projectRoot, 'node_modules/.bin/prettier');
-        if (fs.existsSync(localPrettier)) return localPrettier;
-        
-        // Check framework node_modules as fallback
-        const fwPrettier = path.join(fwRoot, 'node_modules/.bin/prettier');
-        if (fs.existsSync(fwPrettier)) return fwPrettier;
-        
-        return 'prettier'; // Fallback to global if all else fails
-    }
 
     // Start PHP built-in server WITH the dev-router
     const phpServer = spawn('php', [
@@ -198,10 +185,3 @@ function rewriteLinks(html, savePath, distSubfolder) {
     return result;
 }
 
-function stripDevContent(html) {
-    // 1. Strip "DEV ONLY" blocks
-    // Supports //, /* */, and <!-- style comments
-    const devOnlyJs = /(\/\/\s*DEV\s+ONLY\s+START|\/\*\s*DEV\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEV\s+ONLY\s+END|\/\*\s*DEV\s+ONLY\s+END\s*\*\/)/gi;
-    const devOnlyHtml = /<!--\s*DEV\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEV\s+ONLY\s+END\s*-->/gi;
-    return html.replace(devOnlyJs, '').replace(devOnlyHtml, '');
-}

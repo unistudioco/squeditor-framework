@@ -1,10 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { projectRoot, config } = require('./utils/core');
 const ui = require('./utils/cli-ui');
-
-const projectRoot = process.cwd();
-const config = require(path.join(projectRoot, 'squeditor.config.js'));
 
 const distDir = path.join(projectRoot, 'dist');
 const zipName = config.dist.zipName || 'squeditor-dist.zip';

@@ -1,15 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { projectRoot, config, findPrettier, safeMkdir, stripDevContent, stripDemoContent } = require('./utils/core');
 const ui = require('./utils/cli-ui');
 
-const projectRoot = process.cwd();
-const config = require(path.join(projectRoot, 'squeditor.config.js'));
 let micromatch;
 try {
-    micromatch = require('micromatch');
+    micromatch = require(path.join(projectRoot, 'node_modules/micromatch'));
 } catch (e) {
-    console.warn('   - ⚠️  Warning: micromatch not found. Media blurring will be skipped.');
+    try {
+        micromatch = require('micromatch');
+    } catch (ee) {
+        ui.warning('micromatch not found. Media blurring will be skipped.');
+    }
 }
 
 let sharp;
@@ -135,31 +138,13 @@ async function createCustomerPackage() {
         fs.rmSync(customerBuildDir, { recursive: true, force: true });
     }
 
-    function safeMkdir(dir) {
-        if (!fs.existsSync(dir)) {
-            try {
-                fs.mkdirSync(dir, { recursive: true });
-            } catch (e) {
-                // Silenced
-            }
-        }
-    }
 
     // General function to strip conditional content based on comment markers
     function stripConditionalContent(content, isCustomerPackage = true) {
-        // 1. Strip "DEV ONLY" blocks (always stripped in dist/customer builds)
-        // Supports //, /* */, and <!-- style comments
-        const devOnlyJs = /(\/\/\s*DEV\s+ONLY\s+START|\/\*\s*DEV\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEV\s+ONLY\s+END|\/\*\s*DEV\s+ONLY\s+END\s*\*\/)/gi;
-        const devOnlyHtml = /<!--\s*DEV\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEV\s+ONLY\s+END\s*-->/gi;
-        content = content.replace(devOnlyJs, '').replace(devOnlyHtml, '');
-
-        // 2. Strip "DEMO MODE ONLY" blocks if we are building the customer package
+        content = stripDevContent(content);
         if (isCustomerPackage) {
-            const demoOnlyJs = /(\/\/\s*DEMO\s+MODE\s+ONLY\s+START|\/\*\s*DEMO\s+MODE\s+ONLY\s+START\s*\*\/)[\s\S]*?(\/\/\s*DEMO\s+MODE\s+ONLY\s+END|\/\*\s*DEMO\s+MODE\s+ONLY\s+END\s*\*\/)/gi;
-            const demoOnlyHtml = /<!--\s*DEMO\s+MODE\s+ONLY\s+START\s*-->[\s\S]*?<!--\s*DEMO\s+MODE\s+ONLY\s+END\s*-->/gi;
-            content = content.replace(demoOnlyJs, '').replace(demoOnlyHtml, '');
+            content = stripDemoContent(content);
         }
-
         return content;
     }
 
@@ -484,18 +469,6 @@ ${rollupInputs}            },
     fs.writeFileSync(path.join(customerBuildDir, 'README.md'), readmeContent);
 
     // Helper to find the prettier executable in the main project
-    function findPrettier() {
-        const localPrettier = path.join(projectRoot, 'node_modules', '.bin', 'prettier');
-        if (fs.existsSync(localPrettier)) {
-            return localPrettier;
-        }
-        // Fallback to framework node_modules if projectRoot one missing (rare but possible in some setups)
-        const fwPrettier = path.join(projectRoot, config.framework, '../node_modules/.bin/prettier');
-        if (fs.existsSync(fwPrettier)) {
-            return fwPrettier;
-        }
-        return 'npx prettier';
-    }
 
     // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)
     try {

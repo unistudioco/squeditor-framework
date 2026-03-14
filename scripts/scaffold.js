@@ -2,12 +2,13 @@
 // scripts/scaffold.js
 const fs = require('fs');
 const path = require('path');
+const ui = require('./utils/cli-ui');
 
 const args = process.argv.slice(2);
 const projectName = args[0];
 
 if (!projectName) {
-    console.error("Usage: node scripts/scaffold.js <project-name> --dest <optional-dest>");
+    ui.error("Usage: node scripts/scaffold.js <project-name> --dest <optional-dest>");
     process.exit(1);
 }
 
@@ -34,12 +35,12 @@ const targetDir = isInsideRepo
     : path.resolve(process.cwd(), destPath);
 
 if (!fs.existsSync(sourceDir)) {
-    console.error(`Source template directory does not exist: ${sourceDir}`);
+    ui.error(`Source template directory does not exist: ${sourceDir}`);
     process.exit(1);
 }
 
 if (fs.existsSync(targetDir)) {
-    console.error(`Target directory already exists: ${targetDir}`);
+    ui.error(`Target directory already exists: ${targetDir}`);
     process.exit(1);
 }
 
@@ -61,7 +62,7 @@ function copyDirectory(src, dest, ignoreList = []) {
     }
 }
 
-console.log(`[Squeditor] Scaffolding new project: ${projectName}...`);
+ui.header(`Scaffolding Project: ${projectName}`);
 
 // 1. Copy the framework core
 if (!isInsideRepo) {

@@ -1,11 +1,21 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
-const projectRoot = process.cwd();
-const config = require(path.join(projectRoot, 'squeditor.config.js'));
-const micromatch = require(path.join(projectRoot, 'node_modules/micromatch'));
+const { projectRoot, config } = require('./utils/core');
 const ui = require('./utils/cli-ui');
+
+// Try to load micromatch from project node_modules or fallback
+let micromatch;
+try {
+    micromatch = require(path.join(projectRoot, 'node_modules/micromatch'));
+} catch (e) {
+    try {
+        micromatch = require('micromatch');
+    } catch (ee) {
+        ui.error('micromatch not found. Please ensure it is installed in your project (npm install).');
+        process.exit(1);
+    }
+}
 
 let sharp;
 try {

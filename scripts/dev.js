@@ -1,38 +1,30 @@
-const { spawn } = require('child_process');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const { spawn, execSync } = require('child_process');
+const { projectRoot, fwRoot, config } = require('./utils/core');
 const getAvailablePort = require('./get-port');
+const ui = require('./utils/cli-ui');
 
 async function startDev() {
     const projectRoot = process.cwd();
 
     // Find available ports
-    const phpPort = await getAvailablePort(3001);
-    const vitePort = await getAvailablePort(5173);
+    const phpPort = await getAvailablePort(config.devServer?.port || 3001);
+    const vitePort = await getAvailablePort(config.devServer?.vitePort || 5173);
 
-    console.log(`[Squeditor] 🚀 Starting Dev Servers...`);
-    console.log(`   - PHP Server: http://127.0.0.1:${phpPort}`);
-    console.log(`   - Vite Server: http://127.0.0.1:${vitePort}`);
+    ui.header('Squeditor Development Mode');
+    ui.step(`PHP Server: http://127.0.0.1:${phpPort}`, 'info');
+    ui.step(`Vite Server: http://127.0.0.1:${vitePort}`, 'info');
 
-    // Read config to resolve framework path dynamically
     const configPath = path.join(projectRoot, 'squeditor.config.js');
-    let fwRoot = '..';
-    if (fs.existsSync(configPath)) {
-        const config = require(configPath);
-        if (config.framework) {
-            fwRoot = config.framework;
-        }
-    }
 
-    // Run build-components.js BEFORE starting servers to ensure
-    // active-themes.php, _uikit_dynamic.scss, _slider_dynamic.js etc. exist on first request
+    // Run build-components.js BEFORE starting servers
     const buildComponentsPath = path.join(fwRoot, 'scripts/build-components.js');
-    console.log('[Squeditor] 🔧 Building dynamic components...');
-    const { execSync } = require('child_process');
+    ui.step('Building dynamic components...', 'gear');
     try {
         execSync(`node "${buildComponentsPath}"`, { stdio: 'inherit', cwd: projectRoot });
     } catch (e) {
-        console.error('[Squeditor] ❌ Failed to build dynamic components:', e.message);
+        ui.error(`Failed to build dynamic components: ${e.message}`);
     }
 
     const devRouterPath = path.join(fwRoot, 'scripts/dev-router.php');

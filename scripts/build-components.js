@@ -1,15 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-
-// Resolve project root (cwd when running npm scripts)
-const projectRoot = process.cwd();
-const config = require(path.join(projectRoot, 'squeditor.config.js'));
-const fwRoot = path.resolve(projectRoot, config.framework); // resolves ..
-const manifest = require(path.join(fwRoot, 'uikit-manifest.json'));
+const { projectRoot, fwRoot, config } = require('./utils/core');
 const resolvePages = require('./utils/resolve-pages');
 const ui = require('./utils/cli-ui');
 
-
+const manifest = require(path.join(fwRoot, 'uikit-manifest.json'));
 const selectedComponents = config.components || [];
 
 ui.header('Generating Distribution Files');
