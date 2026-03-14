@@ -15,6 +15,10 @@ $sq-font-heading:   "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, Blink
 $sq-font-serif:     'Georgia', 'Times New Roman', serif !default;
 $sq-font-mono:      'JetBrains Mono', 'Fira Code', monospace !default;
 
+$sq-heading-font-weight:    700 !default;
+$sq-heading-line-height:    1 !default;
+$sq-heading-letter-spacing: -0.04em !default;
+
 // --- Spacing Scale ---
 $sq-spacing: (
     'xs':   0.25rem,

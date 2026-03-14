@@ -176,8 +176,27 @@ async function createCustomerPackage() {
 
     // 1. Copy Compiled HTML
     ui.step('Copying compiled HTML to dist/ and src/...');
-    // Silenced: console.log('   - Cleaning HTML snapshots (selective themes & switcher removal)');
-    const distHtmlFiles = fs.readdirSync(distDir).filter(file => file.endsWith('.html'));
+
+    // Recursive function to find all HTML files in dist/
+    function getHtmlFilesRecursive(dir, base = '') {
+        let results = [];
+        const list = fs.readdirSync(dir);
+        list.forEach(file => {
+            const filePath = path.join(dir, file);
+            const relPath = path.join(base, file);
+            const stat = fs.statSync(filePath);
+            if (stat && stat.isDirectory()) {
+                if (file !== 'assets') { // Skip assets folder
+                    results = results.concat(getHtmlFilesRecursive(filePath, relPath));
+                }
+            } else if (file.endsWith('.html')) {
+                results.push(relPath);
+            }
+        });
+        return results;
+    }
+
+    const distHtmlFiles = getHtmlFilesRecursive(distDir);
     safeMkdir(path.join(customerBuildDir, 'src'));
 
     const pageToTheme = {};
@@ -185,10 +204,13 @@ async function createCustomerPackage() {
         Object.keys(config.themes).forEach(themeKey => {
             const themeData = config.themes[themeKey];
             if (themeData && themeData.pages) {
+                const subfolder = themeData.distSubfolder || '';
                 themeData.pages.forEach(page => {
                     if (typeof page === 'string') {
                         const htmlName = page.replace('.php', '.html');
-                        pageToTheme[htmlName] = themeKey;
+                        // Store the full relative path as expected in dist/
+                        const distHtmlPath = path.join(subfolder, htmlName);
+                        pageToTheme[distHtmlPath] = themeKey;
                     }
                 });
             }
@@ -196,16 +218,23 @@ async function createCustomerPackage() {
     }
 
     distHtmlFiles.forEach(file => {
-        let htmlContent = fs.readFileSync(path.join(distDir, file), 'utf8');
+        const srcFile = path.join(distDir, file);
+        const distDest = path.join(customerBuildDir, 'dist', file);
+        const srcDest = path.join(customerBuildDir, 'src', file);
+
+        // Ensure target directories exist (for subfolder support)
+        fs.mkdirSync(path.dirname(distDest), { recursive: true });
+        fs.mkdirSync(path.dirname(srcDest), { recursive: true });
+
+        let htmlContent = fs.readFileSync(srcFile, 'utf8');
         // Apply general conditional content stripping (both Dev and Demo blocks)
         htmlContent = stripConditionalContent(htmlContent, true);
 
         // 1. Remove Theme Switcher Block (div + script + styles + comments)
-        // Aggressively target the isolation style block - MUST be anchored to the start of the style content to avoid greedy matching across multiple style tags
+        // Aggressively target the isolation style block
         htmlContent = htmlContent.replace(/<style>\s*\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
-        // Target the switcher floating component - Combine comment and div to be precise
+        // Target the switcher floating component
         htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->\s*<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
-        // Fallback for cases where comment might have been stripped or separated
         htmlContent = htmlContent.replace(/<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
         htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->/g, '');
 
@@ -213,35 +242,39 @@ async function createCustomerPackage() {
         const assignedTheme = pageToTheme[file];
         const allThemes = Object.keys(config.themes || {});
 
+        // Calculate relative prefix back to dist/src root
+        const depth = file.split(path.sep).length - 1;
+        const prefix = depth > 0 ? '../'.repeat(depth) : '';
+
         // dist/ gets production HTML referencing compiled CSS
         let distHtml = htmlContent;
         allThemes.forEach(t => {
             if (t !== assignedTheme) {
-                const regex = new RegExp(`<link rel="stylesheet" href="assets/css/theme-${t}\\.min\\.css">\\s*`, 'g');
+                const regex = new RegExp(`<link rel="stylesheet" href="([^"]*?)assets/css/theme-${t}\\.min\\.css"\\s*/?>\\s*`, 'g');
                 distHtml = distHtml.replace(regex, '');
             }
         });
-        fs.writeFileSync(path.join(customerBuildDir, 'dist', file), distHtml);
+        fs.writeFileSync(distDest, distHtml);
 
         // src/ gets dev HTML: rewrite CSS refs to raw SCSS for Vite HMR
         let devHtml = htmlContent;
         // Rewrite main CSS
-        devHtml = devHtml.replace(/href="assets\/css\/main\.min\.css"/g, 'href="assets/scss/main.scss"');
-        devHtml = devHtml.replace(/href="assets\/css\/tailwind\.css"/g, 'href="assets/css/tailwind.css"');
+        devHtml = devHtml.replace(/href="([^"]*?)assets\/css\/main\.min\.css"/g, `href="${prefix}assets/scss/main.scss"`);
+        devHtml = devHtml.replace(/href="([^"]*?)assets\/css\/tailwind\.css"/g, `href="${prefix}assets/css/tailwind.css"`);
         
         // Rewrite/Clean themes for dev
         allThemes.forEach(t => {
-            const themeLinkRegex = new RegExp(`<link rel="stylesheet" href="assets/css/theme-${t}\\.min\\.css">`, 'g');
+            const themeLinkRegex = new RegExp(`<link rel="stylesheet" href="([^"]*?)assets/css/theme-${t}\\.min\\.css"\\s*/?>`, 'g');
             if (t === assignedTheme) {
                 // Transform to SCSS script for HMR
-                devHtml = devHtml.replace(themeLinkRegex, `<script type="module" src="assets/scss/theme-${t}.scss"></script>`);
+                devHtml = devHtml.replace(themeLinkRegex, `<script type="module" src="${prefix}assets/scss/theme-${t}.scss"></script>`);
             } else {
                 // Remove entirely
                 devHtml = devHtml.replace(themeLinkRegex, '');
             }
         });
         
-        fs.writeFileSync(path.join(customerBuildDir, 'src', file), devHtml);
+        fs.writeFileSync(srcDest, devHtml);
     });
 
     // 3. Copy Theme Configs
@@ -407,7 +440,8 @@ async function createCustomerPackage() {
 
     let rollupInputs = '';
     distHtmlFiles.forEach(file => {
-        const name = file.replace('.html', '');
+        // Handle naming for subfolders: saas-demo/landing -> saas-demo-landing
+        const name = file.replace('.html', '').replace(/[\\/]/g, '-');
         rollupInputs += `                '${name}': path.resolve(__dirname, 'src/${file}'),\n`;
     });
 
