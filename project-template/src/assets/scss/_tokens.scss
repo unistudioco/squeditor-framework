@@ -3,36 +3,28 @@
 // To customize other tokens, use custom.scss or theme-specific overrides.
 // _tokens.scss — Design tokens as CSS custom properties
 
-// 1. Global Design Tokens (Static context — never change per theme)
+// 1. Global Design Tokens (Static context — defaults)
 :root {
     // Typography
-    --sq-font-sans: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --sq-font-heading: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --sq-font-serif: 'Georgia', 'Times New Roman', serif;
-    --sq-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --sq-font-sans: #{$sq-font-sans};
+    --sq-font-heading: #{$sq-font-heading};
+    --sq-font-serif: #{$sq-font-serif};
+    --sq-font-mono: #{$sq-font-mono};
 
     // Spacing scale
-    --sq-space-xs: 0.25rem;
-    --sq-space-sm: 0.5rem;
-    --sq-space-md: 1rem;
-    --sq-space-lg: 2rem;
-    --sq-space-xl: 4rem;
-    --sq-space-2xl: 8rem;
+    @each $key, $val in $sq-spacing {
+        --sq-space-#{$key}: #{$val};
+    }
 
     // Border radius
-    --sq-radius-xs: 0.15rem;
-    --sq-radius-sm: 0.25rem;
-    --sq-radius-md: 0.5rem;
-    --sq-radius-lg: 0.75rem;
-    --sq-radius-xl: 1rem;
-    --sq-radius-2xl: 1.5rem;
-    --sq-radius-3xl: 2rem;
-    --sq-radius-full: 9999px;
+    @each $key, $val in $sq-radius {
+        --sq-radius-#{$key}: #{$val};
+    }
 
     // Shadows
-    --sq-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --sq-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-    --sq-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.15);
+    @each $key, $val in $sq-shadows {
+        --sq-shadow-#{$key}: #{$val};
+    }
 
     // Z-index scale
     --sq-z-sticky: 980;
@@ -40,7 +32,7 @@
     --sq-z-modal: 1100;
     --sq-z-tooltip: 1200;
 
-    // Page Transitions
+    // Page Transitions (defaults)
     --sq-page-transition-from: var(--sq-color-secondary);
     --sq-page-transition-via: var(--sq-color-accent);
     --sq-page-transition-to: var(--sq-color-accent);
@@ -52,12 +44,12 @@
 // 3. Component Tokens (reference color vars — auto-cascade when colors change)
 :root, .sq-theme-light {
     // Buttons
-    --sq-btn-height: 2.75rem;
+    --sq-btn-height: #{$sq-btn-height};
     --sq-btn-bg: transparent;
     --sq-btn-text: var(--sq-color-body-text);
-    --sq-btn-radius: var(--sq-radius-md);
+    --sq-btn-radius: #{$sq-btn-radius};
     --sq-btn-font-size: 1rem;
-    --sq-btn-font-weight: 600;
+    --sq-btn-font-weight: #{$sq-btn-font-weight};
 
     --sq-btn-default-bg: var(--sq-color-light);
     --sq-btn-default-text: var(--sq-color-muted-text);
@@ -70,27 +62,31 @@
     --sq-btn-ghost-hover-bg: var(--sq-color-light);
 
     // Forms
-    --sq-form-min-height: 2.5rem; // h-10
-    --sq-form-padding: 0.75rem;
+    --sq-form-min-height: #{$sq-form-min-height};
+    --sq-form-padding: #{$sq-form-padding};
     --sq-form-bg: var(--sq-color-white);
     --sq-form-border: #E2E8F0; // zinc-200
     --sq-form-text: var(--sq-color-body-text);
-    --sq-form-radius: var(--sq-radius-md);
+    --sq-form-radius: #{$sq-form-radius};
     --sq-form-focus-ring: rgba(15, 23, 42, 0.1); // primary w/ opacity
     --sq-form-focus-border: var(--sq-color-primary);
 
     // Navbar
-    --sq-navbar-nav-min-height: 60px;
+    --sq-navbar-font-family: var(--sq-font-sans);
+    --sq-navbar-font-size: 1rem;
+    --sq-navbar-font-weight: 500;
+    --sq-navbar-nav-min-height: #{$sq-navbar-nav-height};
     --sq-navbar-nav-padding: 0px;
-    --sq-navbar-nav-gap: 1.75rem;
+    --sq-navbar-nav-gap: #{$sq-navbar-nav-gap};
     --sq-navbar-nav-color: var(--sq-color-body-text);
     --sq-navbar-nav-hover-color: var(--sq-color-secondary);
+    --sq-navbar-nav-active-color: var(--sq-color-secondary);
 
     // Dropdown
-    --sq-dropdown-width: 300px;
-    --sq-dropdown-padding: 2rem;
-    --sq-dropdown-bg: var(--sq-color-muted-bg);
-    --sq-dropdown-text: var(--sq-color-body-text);
+    --sq-dropdown-width: #{$sq-dropdown-width};
+    --sq-dropdown-padding: #{$sq-dropdown-padding};
+    --sq-dropdown-bg: var(--sq-color-light);
+    --sq-dropdown-text: var(--sq-color-muted-text);
 
     // Accordion
     --sq-accordion-title-bg: #8b8b8b15; // zinc-50
@@ -184,10 +180,16 @@
     --sq-drop-close-color: var(--sq-color-muted-text);
 
     // Cards
-    --sq-card-bg: #19191b;
+    --sq-card-bg: #222224;
     --sq-card-shadow: none;
     --sq-card-shadow-hover: none;
 
+    // Navbar
+    --sq-navbar-nav-color: var(--sq-color-body-text);
+    --sq-navbar-nav-hover-color: var(--sq-color-secondary);
+    --sq-navbar-nav-active-color: var(--sq-color-secondary);
+
     // Dropdown
-    --sq-dropdown-bg: var(--sq-color-muted-bg);
+    --sq-dropdown-bg: var(--sq-color-dark);
+    --sq-dropdown-text: var(--sq-color-muted-text);
 }

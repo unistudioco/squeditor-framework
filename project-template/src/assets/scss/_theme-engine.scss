@@ -17,25 +17,33 @@
 // Color keys that get automatic contrast text calculation
 $_contrast-keys: ('primary', 'secondary', 'accent') !default;
 
+// Internal: emit CSS custom properties for a single color map.
+// 💡 Optimization: Only emits variables if they differ from the $base map.
+// This prevents redundant tokens in theme files that already exist in the base theme.
 // ---------------------------------------------------------------------------
-// Internal: emit CSS custom properties for a single color map
-// ---------------------------------------------------------------------------
-@mixin _sq-emit-colors($colors) {
+@mixin _sq-emit-colors($colors, $base: ()) {
     @each $key, $value in $colors {
-        --sq-color-#{$key}: #{$value};
+        $base-val: null;
+        @if map-has-key($base, $key) {
+            $base-val: map-get($base, $key);
+        }
+        
+        @if $value != $base-val {
+            --sq-color-#{$key}: #{$value};
 
-        // Only generate RGB variant for actual Sass colors (not var() references)
-        @if type-of($value) == 'color' {
-            --sq-color-#{$key}-rgb: #{sq-rgb($value)};
+            // Only generate RGB variant for actual Sass colors (not var() references)
+            @if type-of($value) == 'color' {
+                --sq-color-#{$key}-rgb: #{sq-rgb($value)};
 
-            // Generate contrast text for brand colors
-            @if index($_contrast-keys, $key) {
-                --sq-color-#{$key}-contrast: #{sq-color-contrast(
-                    $value,
-                    $sq-contrast-light-text,
-                    $sq-contrast-dark-text,
-                    $sq-min-contrast-ratio
-                )};
+                // Generate contrast text for brand colors
+                @if index($_contrast-keys, $key) {
+                    --sq-color-#{$key}-contrast: #{sq-color-contrast(
+                        $value,
+                        $sq-contrast-light-text,
+                        $sq-contrast-dark-text,
+                        $sq-min-contrast-ratio
+                    )};
+                }
             }
         }
     }
@@ -43,10 +51,18 @@ $_contrast-keys: ('primary', 'secondary', 'accent') !default;
 
 // ---------------------------------------------------------------------------
 // Internal: emit arbitrary overrides as --sq-{key}: {value}
+// Optional $base map for filtering
 // ---------------------------------------------------------------------------
-@mixin _sq-emit-overrides($overrides) {
+@mixin _sq-emit-overrides($overrides, $base: ()) {
     @each $key, $value in $overrides {
-        --sq-#{$key}: #{$value};
+        $base-val: null;
+        @if map-has-key($base, $key) {
+            $base-val: map-get($base, $key);
+        }
+        
+        @if $value != $base-val {
+            --sq-#{$key}: #{$value};
+        }
     }
 }
 
@@ -79,15 +95,21 @@ $_contrast-keys: ('primary', 'secondary', 'accent') !default;
     #{$selector}, 
     #{$selector}.sq-theme-light, 
     #{$selector} .sq-theme-light {
-        @include _sq-emit-colors($colors);
-        @include _sq-emit-overrides($overrides);
-        @content;
+        // ALWAYS emit all light colors to ensure specificity and self-containment
+        @include _sq-emit-colors($colors, ()); 
+        @include _sq-emit-overrides($overrides); 
     }
 
     @if length(map-keys($dark-colors)) > 0 or length(map-keys($dark-overrides)) > 0 {
         #{$selector}.sq-theme-dark, #{$selector} .sq-theme-dark {
-            @include _sq-emit-colors($dark-colors);
+            // ALWAYS emit all dark colors to ensure specificity and self-containment
+            @include _sq-emit-colors($dark-colors, ());
             @include _sq-emit-overrides($dark-overrides);
         }
+    }
+
+    // Emit custom rules at the bottom after all variables have been tokens.
+    #{$selector} {
+        @content;
     }
 }

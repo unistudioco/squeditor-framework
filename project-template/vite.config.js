@@ -73,7 +73,7 @@ export default defineConfig({
                 api: 'modern-compiler',
                 silenceDeprecations: ['import', 'legacy-js-api', 'global-builtin'],
                 // Global SCSS import for all files
-                additionalData: `@import "/assets/scss/_config.scss"; @import "/assets/scss/_functions.scss"; @import "/assets/scss/_theme-engine.scss"; @import "/assets/scss/_tokens.scss";`,
+                additionalData: `@import "/assets/scss/_config.scss"; @import "/assets/scss/_functions.scss"; @import "/assets/scss/_theme-engine.scss";`,
             },
         },
     },

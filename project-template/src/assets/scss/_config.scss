@@ -9,6 +9,56 @@ $sq-min-contrast-ratio: 2.5;
 $sq-contrast-dark-text: #19191b;
 $sq-contrast-light-text: #ffffff;
 
+// --- Typography ---
+$sq-font-sans:      "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !default;
+$sq-font-heading:   "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !default;
+$sq-font-serif:     'Georgia', 'Times New Roman', serif !default;
+$sq-font-mono:      'JetBrains Mono', 'Fira Code', monospace !default;
+
+// --- Spacing Scale ---
+$sq-spacing: (
+    'xs':   0.25rem,
+    'sm':   0.5rem,
+    'md':   1rem,
+    'lg':   2rem,
+    'xl':   4rem,
+    '2xl':  8rem,
+) !default;
+
+// --- Radius Presets ---
+$sq-radius: (
+    'xs':   0.15rem,
+    'sm':   0.25rem,
+    'md':   0.5rem,
+    'lg':   0.75rem,
+    'xl':   1rem,
+    '2xl':  1.5rem,
+    '3xl':  2rem,
+    'full': 9999px,
+) !default;
+
+// --- Shadows ---
+$sq-shadows: (
+    'sm':   0 1px 3px rgba(0, 0, 0, 0.08),
+    'md':   0 4px 16px rgba(0, 0, 0, 0.1),
+    'lg':   0 10px 40px rgba(0, 0, 0, 0.15),
+) !default;
+
+// --- Component Defaults ---
+$sq-btn-height:         2.75rem !default;
+$sq-btn-font-weight:    600 !default;
+$sq-btn-radius:         0.5rem !default;
+
+$sq-navbar-nav-height:  72px !default;
+$sq-navbar-nav-gap:     1.75rem !default;
+
+$sq-dropdown-width:     300px !default;
+$sq-dropdown-padding:   2rem !default;
+
+$sq-form-min-height:    2.5rem !default;
+$sq-form-padding:       0.75rem !default;
+$sq-form-radius:        0.5rem !default;
+
 // --- Base Colors (Light Mode) ---
 $base-colors: (
     'primary':      #107466,
