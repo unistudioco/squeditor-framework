@@ -31,7 +31,7 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
   <title><?= htmlspecialchars($page_title) ?></title>
   <meta name="description" content="<?= htmlspecialchars($page_description) ?>">
   
-  <!-- Typography -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=TASA+Orbiter:wght@400..800&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
   <meta property="og:image"       content="assets/static/images/og-default.png">
   <meta property="og:type"        content="website">
 
-  <!-- Squeditor CSS -->
+  <!-- CSS -->
 <?php if ($is_vite): ?>
   <!-- Vite Development Environment -->
   <script type="module" src="<?= $vite_server ?>/@vite/client"></script>
@@ -92,7 +92,7 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
   <?php endif; ?>
 <?php endif; ?>
 
-<!-- UIkit Components JS (Early Init) -->
+    <!-- JS (Early Init) -->
 <?php if ($is_vite): ?>
   <script src="<?= $vite_server ?>/assets/js/uikit-components.js"></script>
 <?php else: ?>
