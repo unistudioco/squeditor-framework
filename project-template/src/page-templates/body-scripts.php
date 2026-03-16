@@ -17,10 +17,8 @@ if (!$is_snapshot) {
 if ($is_vite):
 ?>
   <!-- Vite Development Scripts -->
-  <script src="<?= $vite_server ?>/assets/js/uikit-components.js"></script>
   <script src="<?= $vite_server ?>/assets/js/main.js" type="module"></script>
 <?php else: ?>
   <!-- Production Static Scripts -->
-  <script src="assets/js/uikit-components.js"></script>
   <script src="assets/js/main.js" type="module"></script>
 <?php endif; ?>

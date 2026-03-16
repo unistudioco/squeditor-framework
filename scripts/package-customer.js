@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { projectRoot, config, findPrettier, safeMkdir, stripDevContent, stripDemoContent } = require('./utils/core');
+const fwRoot = path.resolve(projectRoot, config.framework);
 const ui = require('./utils/cli-ui');
 
 let micromatch;
@@ -217,6 +218,13 @@ async function createCustomerPackage() {
         });
     }
 
+    const requiredDirs = ['assets/css', 'assets/js', 'assets/static/images'];
+    requiredDirs.forEach(dir => {
+        if (!fs.existsSync(path.join(distDir, dir))) {
+            ui.warning(`Missing in dist: ${dir} — please verify build integrity.`);
+        }
+    });
+
     distHtmlFiles.forEach(file => {
         const srcFile = path.join(distDir, file);
         const distDest = path.join(customerBuildDir, 'dist', file);
@@ -230,111 +238,199 @@ async function createCustomerPackage() {
         // Apply general conditional content stripping (both Dev and Demo blocks)
         htmlContent = stripConditionalContent(htmlContent, true);
 
-        // 1. Remove Theme Switcher Block (div + script + styles + comments)
-        // Aggressively target the isolation style block
+        // 1. Remove "DEMO PURPOSE ONLY" blocks aggressively
+        // This catches everything wrapped in <!-- DEMO PURPOSE ONLY: ... --> ... <!-- /DEMO --> or standard comment headers
+        htmlContent = htmlContent.replace(/<!--\s*DEMO PURPOSE ONLY:[\s\S]*?-->[\s\S]*?<!--\s*\/DEMO\s*-->/gi, '');
+        // Targeted cleaning for the specific floating switcher block and its isolator
         htmlContent = htmlContent.replace(/<style>\s*\/\* Isolate Theme Switcher[\s\S]*?<\/style>/gi, '');
-        // Target the switcher floating component
+        htmlContent = htmlContent.replace(/<!--\s*DEMO PURPOSE ONLY:[\s\S]*?Floating Theme Switcher[\s\S]*?-->\s*<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
         htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->\s*<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
         htmlContent = htmlContent.replace(/<div class="sq-theme-switcher[\s\S]*?<\/script>/gi, '');
-        htmlContent = htmlContent.replace(/<!--\s*Floating Theme Switcher\s*-->/g, '');
+        
+        // Remove standing demo comments that might be floating
+        htmlContent = htmlContent.replace(/<!--\s*DEMO PURPOSE ONLY:[\s\S]*?-->/gi, '');
 
         // 2. Identify assigned theme
         const assignedTheme = pageToTheme[file];
         const allThemes = Object.keys(config.themes || {});
 
-        // Calculate relative prefix back to dist/src root
+        // Calculate relative prefix back to dist/src root.
+        // path.sep-aware: split by OS separator and count directory components.
         const depth = file.split(path.sep).length - 1;
         const prefix = depth > 0 ? '../'.repeat(depth) : '';
 
-        // dist/ gets production HTML referencing compiled CSS
+        // ─── dist/ HTML: production references to compiled CSS/JS ────────────────
         let distHtml = htmlContent;
+
+        // Ensure main.js loads as a module (ESM entry point)
+        distHtml = distHtml.replace(
+            /<script([^>]*?)src="([^"]*?)assets\/js\/main\.js"([^>]*?)>/g,
+            (match, pre, p, post) => {
+                // Add type="module" if not already present
+                if (/type=["']module["']/.test(match)) return match;
+                return `<script${pre}type="module" src="${prefix}assets/js/main.js"${post}>`;
+            }
+        );
+
+        // uikit-components.js must remain a classic (non-module) UMD script — rewrite prefix only
+        distHtml = distHtml.replace(
+            /<script([^>]*?)src="[^"]*?assets\/js\/uikit-components\.js"([^>]*?)>/g,
+            `<script$1src="${prefix}assets/js/uikit-components.js"$2>`
+        );
+
+        // Remove all theme CSS links that do NOT belong to this page; keep only the assigned one
         allThemes.forEach(t => {
             if (t !== assignedTheme) {
-                const regex = new RegExp(`<link rel="stylesheet" href="([^"]*?)assets/css/theme-${t}\\.min\\.css"\\s*/?>\\s*`, 'g');
+                const regex = new RegExp(`<link[^>]*?href="[^"]*?assets/css/theme-${t}\\.min\\.css"[^>]*?>\\s*`, 'g');
                 distHtml = distHtml.replace(regex, '');
+            } else {
+                // Ensure the assigned theme link has the correct prefix
+                const regex = new RegExp(`(<link[^>]*?href=")[^"]*?(assets/css/theme-${t}\\.min\\.css"[^>]*?>)`, 'g');
+                distHtml = distHtml.replace(regex, `$1${prefix}$2`);
             }
         });
+
+        // Rewrite any remaining root-relative asset hrefs/srcs to depth-adjusted paths
+        // (catches tailwind.css, main.min.css, fonts.css, squeditor-icons.css, slider.min.css, etc.)
+        if (prefix) {
+            distHtml = distHtml.replace(
+                /(href|src)="(?!http|\/\/|#|data:)([^"]*?assets\/[^"]+)"/g,
+                (match, attr, assetPath) => {
+                    // Already has the right prefix? Don't double-prefix.
+                    if (assetPath.startsWith(prefix)) return match;
+                    // Strip any stale leading ../  from the snapshot so we always start clean
+                    const cleanPath = assetPath.replace(/^(\.\.\/)+/, '');
+                    return `${attr}="${prefix}${cleanPath}"`;
+                }
+            );
+        }
+
         fs.writeFileSync(distDest, distHtml);
 
-        // src/ gets dev HTML: rewrite CSS refs to raw SCSS for Vite HMR
+        // ─── src/ HTML: Vite dev-server references ───────────────────────────────
+        // The customer runs `npm run dev` (plain Vite) from the package root.
+        // Vite processes HTML, serves SCSS/CSS through its pipeline and injects HMR.
+        //
+        // Key rules:
+        //   • SCSS must be imported via <script type="module"> — NOT <link href>.
+        //     Browsers cannot parse SCSS; only Vite's module pipeline can.
+        //   • tailwind.css and plain CSS files stay as <link rel="stylesheet">.
+        //   • main.js must be <script type="module"> for Vite HMR.
+        //   • uikit-components.js is a UMD classic script — no type="module".
+        //     It lives in public/ so Vite never tries to bundle it.
+        //   • A FOUC-prevention inline style+script is injected so the page stays
+        //     invisible until Vite has injected all CSS modules (main.js removes
+        //     the js-fouc class once initialisation is complete).
+
         let devHtml = htmlContent;
-        // Rewrite main CSS
-        devHtml = devHtml.replace(/href="([^"]*?)assets\/css\/main\.min\.css"/g, `href="${prefix}assets/scss/main.scss"`);
-        devHtml = devHtml.replace(/href="([^"]*?)assets\/css\/tailwind\.css"/g, `href="${prefix}assets/css/tailwind.css"`);
-        
-        // Rewrite/Clean themes for dev
+
+        // Replace compiled main.min.css <link> with a Vite SCSS module script
+        devHtml = devHtml.replace(
+            /<link[^>]*?href="[^"]*?assets\/css\/main\.min\.css"[^>]*?>/g,
+            `<script type="module" src="${prefix}assets/scss/main.scss"></script>`
+        );
+
+        // Keep tailwind.css as a plain stylesheet (it's a real CSS file in src/)
+        devHtml = devHtml.replace(
+            /(href=")[^"]*?(assets\/css\/tailwind\.css")/g,
+            `$1${prefix}$2`
+        );
+
+        // Pre-compiled static CSS (fonts, icons, slider) — use ABSOLUTE paths.
+        // These files live in public/assets/css/ and Vite must NOT process them:
+        // they contain @font-face url() references that Vite can't resolve because
+        // the font files are in public/assets/static/fonts/, not in src/.
+        // Absolute paths tell Vite they are public-dir assets → copied verbatim,
+        // no CSS processing, no font-resolution warnings.
+        ['squeditor-icons.css', 'fonts.css', 'slider.min.css'].forEach(cssFile => {
+            devHtml = devHtml.replace(
+                new RegExp(`<link([^>]*?)href="[^"]*?assets/css/${cssFile.replace(/\./g, '\\.')}"([^>]*?)>`, 'g'),
+                `<link$1href="/assets/css/${cssFile}"$2>`
+            );
+        });
+
+        // main.js → module script for Vite HMR
+        devHtml = devHtml.replace(
+            /<script([^>]*?)src="[^"]*?assets\/js\/main\.js"([^>]*?)>/g,
+            (match, pre, post) => {
+                if (/type=["']module["']/.test(match)) return `<script${pre}src="${prefix}assets/js/main.js"${post}>`;
+                return `<script${pre}type="module" src="${prefix}assets/js/main.js"${post}>`;
+            }
+        );
+
+        // uikit-components.js — classic UMD script served from public/ by Vite.
+        // MUST use an absolute path (/assets/js/...) so Vite recognises it as a
+        // public-dir asset and skips bundling entirely (eliminates "can't be bundled
+        // without type=module" warning). The prefix is irrelevant here: absolute paths
+        // are always resolved relative to the server root, not the HTML file location.
+        devHtml = devHtml.replace(
+            /<script([^>]*?)src="[^"]*?assets\/js\/uikit-components\.js"([^>]*?)>/g,
+            `<script$1src="/assets/js/uikit-components.js"$2>`
+        );
+
+        // Rewrite / clean theme CSS for dev:
+        //   assigned theme → <script type="module" src="...theme-X.scss">
+        //   all others     → removed entirely
         allThemes.forEach(t => {
-            const themeLinkRegex = new RegExp(`<link rel="stylesheet" href="([^"]*?)assets/css/theme-${t}\\.min\\.css"\\s*/?>`, 'g');
+            const themeLinkRegex = new RegExp(`<link[^>]*?href="[^"]*?assets/css/theme-${t}\\.min\\.css"[^>]*?>`, 'g');
             if (t === assignedTheme) {
-                // Transform to SCSS script for HMR
-                devHtml = devHtml.replace(themeLinkRegex, `<script type="module" src="${prefix}assets/scss/theme-${t}.scss"></script>`);
+                devHtml = devHtml.replace(
+                    themeLinkRegex,
+                    `<script type="module" src="${prefix}assets/scss/theme-${t}.scss"></script>`
+                );
             } else {
-                // Remove entirely
                 devHtml = devHtml.replace(themeLinkRegex, '');
             }
         });
-        
+
+        // FIX Issue C — FOUC Prevention
+        // Inject the js-fouc guard just before </head> so the page is invisible until
+        // Vite's CSS modules have been applied. main.js must call:
+        //   document.documentElement.classList.remove('js-fouc');
+        // once UIKit and all styles are ready. (The framework's main.js already does this.)
+        const foucSnippet = [
+            '  <!-- Vite FOUC Prevention: hides page until CSS modules are applied -->',
+            '  <style>html.js-fouc{opacity:0;transition:opacity .2s ease-out}</style>',
+            '  <script>document.documentElement.classList.add(\'js-fouc\');</script>',
+        ].join('\n');
+        devHtml = devHtml.replace('</head>', `${foucSnippet}\n</head>`);
+
         fs.writeFileSync(srcDest, devHtml);
     });
 
-    // 3. Copy Theme Configs
-    ui.step('Copying theme configurations to src/config...');
-    const customerConfigDir = path.join(customerBuildDir, 'src/config');
-    if (!fs.existsSync(customerConfigDir)) {
-        fs.mkdirSync(customerConfigDir, { recursive: true });
-    }
-    const configFiles = fs.readdirSync(path.join(srcDir, 'config'));
-    configFiles.forEach(file => {
-        const srcConfig = path.join(srcDir, 'config', file);
-        const destConfig = path.join(customerConfigDir, file);
+    // 2. [REMOVED] Copy Theme Configs
+    // Customer package should NOT have PHP/Config files.
 
-        if (file === 'site-settings.php') {
-            // Force demo_mode to false in customer package
-            const settingsContent = `<?php\n// Auto-generated by package-customer.js\n$site_settings = [\n    'is_demo_mode' => false,\n];\n`;
-            fs.writeFileSync(destConfig, settingsContent);
-        } else {
-            fs.copyFileSync(srcConfig, destConfig);
-        }
-    });
-
-    // 4. Copy Developer Assets
+    // ─── Developer Source Assets ────────────────────────────────────────────────
+    // IMPORTANT: only tailwind.css belongs in src/assets/css/.
+    // Pre-compiled CSS files (squeditor-icons, fonts, slider) must NOT go into
+    // src/ — Vite processes every CSS file it finds there and tries to resolve
+    // url() font paths, which fail because those fonts are in public/assets/static/,
+    // not src/assets/static/. These files go to public/ ONLY (handled below).
     ui.step('Copying developer source files to src/assets...');
     fs.mkdirSync(path.join(customerBuildDir, 'src/assets/css'), { recursive: true });
-    // Also copy dist production files
     fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/css'), { recursive: true });
-    
+
+    // tailwind.css: copied to src/ so the customer can recompile Tailwind on changes
     const tailwindPath = path.join(distDir, 'assets/css/tailwind.css');
     if (fs.existsSync(tailwindPath)) {
         let twContent = fs.readFileSync(tailwindPath, 'utf8');
         fs.writeFileSync(path.join(customerBuildDir, 'src/assets/css/tailwind.css'), cleanCssContent(twContent));
         fs.writeFileSync(path.join(customerBuildDir, 'dist/assets/css/tailwind.css'), cleanCssContent(twContent));
     }
-    
-    const iconPath = path.join(distDir, 'assets/css/squeditor-icons.css');
-    if (fs.existsSync(iconPath)) {
-        fs.copyFileSync(iconPath, path.join(customerBuildDir, 'src/assets/css/squeditor-icons.css'));
-        fs.copyFileSync(iconPath, path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
-    }
 
-    const fontsCssPath = path.join(distDir, 'assets/css/fonts.css');
-    if (fs.existsSync(fontsCssPath)) {
-        fs.copyFileSync(fontsCssPath, path.join(customerBuildDir, 'src/assets/css/fonts.css'));
-        fs.copyFileSync(fontsCssPath, path.join(customerBuildDir, 'dist/assets/css/fonts.css'));
-    }
-    
+    // main.min.css: dist only (customers rebuild it via npm run build)
     const mainCssPath = path.join(distDir, 'assets/css/main.min.css');
     if (fs.existsSync(mainCssPath)) {
         let mainContent = fs.readFileSync(mainCssPath, 'utf8');
         fs.writeFileSync(path.join(customerBuildDir, 'dist/assets/css/main.min.css'), cleanCssContent(mainContent));
     }
 
-    // slider.min.css contains the slider library CSS (Splide/Swiper)
-    if (fs.existsSync(path.join(distDir, 'assets/css/slider.min.css'))) {
-        fs.copyFileSync(path.join(distDir, 'assets/css/slider.min.css'), path.join(customerBuildDir, 'src/assets/css/slider.min.css'));
-        fs.copyFileSync(path.join(distDir, 'assets/css/slider.min.css'), path.join(customerBuildDir, 'dist/assets/css/slider.min.css'));
-    }
-
-    fs.cpSync(path.join(srcDir, 'assets/scss'), path.join(customerBuildDir, 'src/assets/scss'), { recursive: true });
+    // SCSS source files
+    fs.cpSync(path.join(srcDir, 'assets/scss'), path.join(customerBuildDir, 'src/assets/scss'), { 
+        recursive: true,
+        filter: (src) => !src.endsWith('.php') 
+    });
 
     const customerScssDir = path.join(customerBuildDir, 'src/assets/scss');
     const mainScssPath = path.join(customerScssDir, 'main.scss');
@@ -357,37 +453,80 @@ async function createCustomerPackage() {
             }
         });
 
-        // Add headers to framework config files
-        const frameworkConfigs = ['active-components.php', 'active-themes.php', 'theme-entries.php'];
-        frameworkConfigs.forEach(file => {
-            const filePath = path.join(customerConfigDir, file);
-            if (fs.existsSync(filePath)) {
-                let content = fs.readFileSync(filePath, 'utf8');
-                if (!content.includes('⚠️ FRAMEWORK FILE')) {
-                    content = content.replace('<?php', '<?php\n// ⚠️ FRAMEWORK FILE — Do not edit. This file will be replaced on updates.');
-                    fs.writeFileSync(filePath, content);
-                }
-            }
-        });
-
         // Clean source SCSS theme files to remove font-family forces
-        const themeScssFiles = fs.readdirSync(path.join(customerScssDir, 'themes')).filter(f => f.endsWith('.scss'));
-        themeScssFiles.forEach(f => {
-            const filePath = path.join(customerScssDir, 'themes', f);
-            let content = fs.readFileSync(filePath, 'utf8');
-            // Remove the h1-h6 font-family block
-            const scssFontRegex = /\s*h1,\s*h2,\s*h3,\s*h4,\s*h5,\s*h6\s*\{[^}]*font-family:\s*var\(--sq-font-heading\);?\s*\}/gi;
-            content = content.replace(scssFontRegex, '');
-            fs.writeFileSync(filePath, content);
-        });
+        const themesScssDir = path.join(customerScssDir, 'themes');
+        if (fs.existsSync(themesScssDir)) {
+            const themeScssFiles = fs.readdirSync(themesScssDir).filter(f => f.endsWith('.scss'));
+            themeScssFiles.forEach(f => {
+                const filePath = path.join(themesScssDir, f);
+                let content = fs.readFileSync(filePath, 'utf8');
+                // Remove the h1-h6 font-family block
+                const scssFontRegex = /\s*h1,\s*h2,\s*h3,\s*h4,\s*h5,\s*h6\s*\{[^}]*font-family:\s*var\(--sq-font-heading\);?\s*\}/gi;
+                content = content.replace(scssFontRegex, '');
+                fs.writeFileSync(filePath, content);
+            });
+        }
     }
 
-    fs.mkdirSync(path.join(customerBuildDir, 'src/assets/js'), { recursive: true });
-    fs.mkdirSync(path.join(customerBuildDir, 'dist/assets/js'), { recursive: true });
-    fs.copyFileSync(path.join(distDir, 'assets/js/uikit-components.js'), path.join(customerBuildDir, 'src/assets/js/uikit-components.js'));
-    fs.copyFileSync(path.join(distDir, 'assets/js/uikit-components.js'), path.join(customerBuildDir, 'dist/assets/js/uikit-components.js'));
-    fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'src/assets/js/main.js'));
-    fs.copyFileSync(path.join(distDir, 'assets/js/main.js'), path.join(customerBuildDir, 'dist/assets/js/main.js'));
+    // Copy source JS to customer src/ (exclude PHP files; exclude uikit-components.js —
+    // it goes into public/ so Vite treats it as a static passthrough, not a bundling target)
+    fs.cpSync(path.join(srcDir, 'assets/js'), path.join(customerBuildDir, 'src/assets/js'), { 
+        recursive: true,
+        filter: (src) => !src.endsWith('.php') && !src.includes('uikit-components.js')
+    });
+
+    // ─── FIX Issue B — uikit-components.js → public/ (not dist/) ────────────────
+    // Vite's publicDir is served as-is in dev and copied verbatim on build.
+    // Placing the UMD bundle here means Vite NEVER tries to bundle or type-check it,
+    // which eliminates the "can't be bundled without type=module" warning entirely.
+    //
+    // We also write it directly into the pre-built dist/ so customers who just want to
+    // drop the dist/ folder onto a host don't need to run `npm run build` first.
+    const uikitSource = path.join(srcDir, 'assets/js/uikit-components.js');
+    if (fs.existsSync(uikitSource)) {
+        // public/ → Vite dev server + build output pipeline
+        const publicJsDir = path.join(customerBuildDir, 'public/assets/js');
+        fs.mkdirSync(publicJsDir, { recursive: true });
+        fs.copyFileSync(uikitSource, path.join(publicJsDir, 'uikit-components.js'));
+
+        // dist/ → pre-built static distribution (no npm build required)
+        const distJsDir = path.join(customerBuildDir, 'dist/assets/js');
+        fs.mkdirSync(distJsDir, { recursive: true });
+        fs.copyFileSync(uikitSource, path.join(distJsDir, 'uikit-components.js'));
+    }
+
+    // ─── FIX Issue A — copy compiled main.js + chunks to customer dist/ ─────────
+    // The main project's `dist/assets/js/` contains Vite's compiled output:
+    //   main.js          — the bundled ES module entry point
+    //   chunks/          — Rollup code-split chunks
+    // These are NEVER generated inside the customer package by the current flow,
+    // so `dist/index.html`'s <script src="assets/js/main.js"> 404s out of the box.
+    // We copy them verbatim from the main project's dist so the pre-built dist works
+    // immediately without requiring the customer to run `npm run build`.
+    ui.step('Copying compiled JS bundle to customer dist/...');
+    const mainDistJsDir = path.join(distDir, 'assets/js');
+    const customerDistJsDir = path.join(customerBuildDir, 'dist/assets/js');
+    if (fs.existsSync(mainDistJsDir)) {
+        fs.mkdirSync(customerDistJsDir, { recursive: true });
+        const copyCompiledJs = (srcD, destD) => {
+            const entries = fs.readdirSync(srcD, { withFileTypes: true });
+            for (const entry of entries) {
+                // uikit-components.js is already handled above — skip it here
+                if (entry.name === 'uikit-components.js') continue;
+                const entrySrc = path.join(srcD, entry.name);
+                const entryDest = path.join(destD, entry.name);
+                if (entry.isDirectory()) {
+                    fs.mkdirSync(entryDest, { recursive: true });
+                    copyCompiledJs(entrySrc, entryDest);
+                } else {
+                    fs.copyFileSync(entrySrc, entryDest);
+                }
+            }
+        };
+        copyCompiledJs(mainDistJsDir, customerDistJsDir);
+    } else {
+        ui.warning('dist/assets/js not found — run the main project build first (npm run build:css).');
+    }
 
     // Copy compiled theme CSS files to customer dist
     if (config.themes) {
@@ -402,15 +541,53 @@ async function createCustomerPackage() {
     }
 
     const staticDistPath = path.join(distDir, 'assets/static');
-    const staticCustomerSourcePath = path.join(customerBuildDir, 'src/assets/static');
     const staticCustomerDistPath = path.join(customerBuildDir, 'dist/assets/static');
-    if (fs.existsSync(staticDistPath)) {
-        await walkAndProcessMedia(staticDistPath, staticCustomerSourcePath, staticDistPath);
-        // Also move these final processed media assets directly from src/ back to dist/
-        fs.cpSync(staticCustomerSourcePath, staticCustomerDistPath, { recursive: true });
+    const publicStaticPath = path.join(customerBuildDir, 'public/assets/static');
+
+    // ─── public/ — Vite static passthrough (dev server + verbatim build copy) ──
+    // Everything in public/ is served at the root in dev and copied verbatim to dist/
+    // on build, WITHOUT going through Rollup/PostCSS. This is the only safe place for:
+    //   • uikit-components.js — UMD bundle that must NOT be bundled
+    //   • squeditor-icons.css / fonts.css / slider.min.css — pre-compiled CSS with
+    //     @font-face url() references that Vite can't resolve (fonts live in public/)
+    //   • All static assets (images, videos, fonts)
+
+    const publicCssDir = path.join(customerBuildDir, 'public/assets/css');
+    fs.mkdirSync(publicCssDir, { recursive: true });
+
+    // squeditor-icons.css — pre-compiled icon font CSS, font files in public/static/
+    const iconPath = path.join(distDir, 'assets/css/squeditor-icons.css');
+    if (fs.existsSync(iconPath)) {
+        fs.copyFileSync(iconPath, path.join(publicCssDir, 'squeditor-icons.css'));
+        fs.copyFileSync(iconPath, path.join(customerBuildDir, 'dist/assets/css/squeditor-icons.css'));
     }
 
-    // 5. Generate package.json and vite.config.js
+    // fonts.css — @font-face declarations for custom fonts, font files in public/static/
+    const fontsCssPath = path.join(distDir, 'assets/css/fonts.css');
+    if (fs.existsSync(fontsCssPath)) {
+        fs.copyFileSync(fontsCssPath, path.join(publicCssDir, 'fonts.css'));
+        fs.copyFileSync(fontsCssPath, path.join(customerBuildDir, 'dist/assets/css/fonts.css'));
+    }
+
+    // slider.min.css — pre-built slider library CSS (Splide/Swiper), keep exact filename
+    const sliderCssSrc = path.join(distDir, 'assets/css/slider.min.css');
+    if (fs.existsSync(sliderCssSrc)) {
+        fs.copyFileSync(sliderCssSrc, path.join(publicCssDir, 'slider.min.css'));
+        fs.copyFileSync(sliderCssSrc, path.join(customerBuildDir, 'dist/assets/css/slider.min.css'));
+    }
+
+    // Static assets (images, videos, fonts)
+    if (fs.existsSync(staticDistPath)) {
+        ui.step('Consolidating static assets to public/...');
+        fs.mkdirSync(path.dirname(publicStaticPath), { recursive: true });
+        await walkAndProcessMedia(staticDistPath, publicStaticPath, staticDistPath);
+
+        // Also populate dist/ for the pre-built preview (no npm run build needed)
+        fs.mkdirSync(path.dirname(staticCustomerDistPath), { recursive: true });
+        fs.cpSync(publicStaticPath, staticCustomerDistPath, { recursive: true });
+    }
+
+    // 5. Generate package.json, vite.config.js, rewrite script and manifest
     ui.step('Generating lean package.json and vite.config.js...');
     const originalPkg = require(path.join(projectRoot, 'package.json'));
     const customerPkg = {
@@ -418,12 +595,16 @@ async function createCustomerPackage() {
         private: true,
         scripts: {
             "dev": "vite",
-            "build": "vite build",
+            "build": "vite build && node scripts/rewrite-dist-html.js",
             "preview": "vite preview",
             "format": "prettier --write \"src/**/*.html\""
         },
         dependencies: {
-            "uikit": originalPkg.dependencies.uikit
+            "uikit": originalPkg.dependencies.uikit || "^3.21.0",
+            "gsap": originalPkg.dependencies.gsap || "^3.12.0",
+            "swiper": originalPkg.dependencies.swiper || "^11.0.0",
+            "@splidejs/splide": originalPkg.dependencies['@splidejs/splide'] || "^4.1.0",
+            "@splidejs/splide-extension-auto-scroll": originalPkg.dependencies['@splidejs/splide-extension-auto-scroll'] || "^0.5.0"
         },
         devDependencies: {
             "sass": originalPkg.devDependencies.sass,
@@ -435,6 +616,15 @@ async function createCustomerPackage() {
     };
     fs.writeFileSync(path.join(customerBuildDir, 'package.json'), JSON.stringify(customerPkg, null, 2));
 
+    // Post-build rewrite: so dist HTML matches framework format (SOP-customer-dist-matches-framework.md)
+    const customerScriptsDir = path.join(customerBuildDir, 'scripts');
+    fs.mkdirSync(customerScriptsDir, { recursive: true });
+    const rewriteScriptPath = path.join(fwRoot, 'scripts', 'rewrite-dist-html.js');
+    if (fs.existsSync(rewriteScriptPath)) {
+        fs.copyFileSync(rewriteScriptPath, path.join(customerScriptsDir, 'rewrite-dist-html.js'));
+    }
+    fs.writeFileSync(path.join(customerScriptsDir, 'page-to-theme.json'), JSON.stringify(pageToTheme, null, 2));
+
     const prettierrcContent = `{\n  "printWidth": 10000,\n  "tabWidth": 4,\n  "useTabs": false,\n  "semi": true,\n  "singleQuote": true,\n  "trailingComma": "es5",\n  "bracketSpacing": true,\n  "htmlWhitespaceSensitivity": "ignore"\n}`;
     fs.writeFileSync(path.join(customerBuildDir, '.prettierrc'), prettierrcContent);
 
@@ -445,13 +635,35 @@ async function createCustomerPackage() {
         rollupInputs += `                '${name}': path.resolve(__dirname, 'src/${file}'),\n`;
     });
 
+    // Add CSS and JS entries.
+    // NOTE: squeditor-icons.css, fonts.css and slider.min.css are NOT rollup entries.
+    // They are pre-compiled artifacts that live in public/assets/css/ and are copied
+    // verbatim by Vite. Adding them as entries caused Vite to process their @font-face
+    // url() declarations and emit "didn't resolve at build time" warnings for every font.
+    rollupInputs += `                'main': path.resolve(__dirname, 'src/assets/js/main.js'),\n`;
+    rollupInputs += `                'main_css': path.resolve(__dirname, 'src/assets/scss/main.scss'),\n`;
+    rollupInputs += `                'tailwind': path.resolve(__dirname, 'src/assets/css/tailwind.css'),\n`;
+    
+    // Theme entries - these are generated by build-components.js in the main SCSS folder
+    if (config.themes) {
+        Object.keys(config.themes).forEach(t => {
+            rollupInputs += `                'theme-${t}': path.resolve(__dirname, 'src/assets/scss/theme-${t}.scss'),\n`;
+        });
+    }
+
+    // ─── FIX Issue B — vite.config.js for the customer package ──────────────────
+    // publicDir points to public/ where uikit-components.js lives.
+    // Vite copies public/ contents verbatim on build and serves them in dev —
+    // the UMD bundle is never passed through Rollup, so there is no bundling warning.
     const viteConfigContent = `import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
     root: 'src',
     base: './',
-    publicDir: false,
+    // public/ is served as-is by Vite dev server and copied verbatim on build.
+    // uikit-components.js lives here so Vite never tries to bundle the UMD script.
+    publicDir: path.resolve(__dirname, 'public'),
     server: {
         host: '127.0.0.1',
         port: 5173,
@@ -464,18 +676,35 @@ export default defineConfig({
             input: {
 ${rollupInputs}            },
             output: {
-                entryFileNames: 'assets/js/[name]-[hash].js',
+                entryFileNames: 'assets/js/[name].js',
+                chunkFileNames: 'assets/js/chunks/[name].js',
                 assetFileNames: (assetInfo) => {
-                    const name = assetInfo.names ? assetInfo.names[0] : assetInfo.name;
-                    if (name.endsWith('.css')) return 'assets/css/[name]-[hash][extname]';
+                    const name = assetInfo.names ? assetInfo.names[0] : (assetInfo.name || '');
                     
-                    // Route fonts to their static folder while preserving subfolders if possible
-                    const isFont = name.match(/\.(woff2?|eot|ttf|otf)$/) || name.includes('squeditor-icons.svg');
-                    if (isFont) {
-                        return 'assets/static/fonts/[name][extname]';
+                    if (name.endsWith('.css')) {
+                        const baseName = name.replace('.css', '');
+                        if (baseName === 'main_css') return 'assets/css/main.min[extname]';
+                        if (baseName.startsWith('theme-')) return 'assets/css/[name].min[extname]';
+                        return 'assets/css/[name][extname]';
                     }
                     
-                    return 'assets/[name]-[hash][extname]';
+                    // Route fonts to their static folder
+                    const isFont = name.match(/\\.(woff2?|eot|ttf|otf)$/) || name.includes('squeditor-icons.svg');
+                    if (isFont) {
+                        if (name.startsWith('squeditor-icons')) {
+                            return 'assets/static/fonts/squeditor-icons/[name][extname]';
+                        }
+                        return 'assets/static/fonts/[name][extname]';
+                    }
+
+                    // Preserve folder structure for static assets where possible
+                    const originalPath = assetInfo.originalFileName || '';
+                    if (originalPath.includes('assets/static/')) {
+                        const staticMatch = originalPath.match(/assets\\/static\\/(.*)/);
+                        if (staticMatch) return \`assets/static/\${staticMatch[1].split('/').slice(0,-1).join('/')}/[name][extname]\`.replace('//', '/');
+                    }
+                    
+                    return 'assets/static/media/[name][extname]';
                 },
             },
         },
@@ -493,16 +722,70 @@ ${rollupInputs}            },
 `;
     fs.writeFileSync(path.join(customerBuildDir, 'vite.config.js'), viteConfigContent);
 
-    const tailwindConfig = `/** @type {import('tailwindcss').Config} */\nmodule.exports = {\n    darkMode: ['selector', '.sq-theme-dark'],\n    content: [ './src/**/*.html' ],\n    theme: {\n        extend: {\n            colors: {\n                primary: 'rgb(var(--sq-color-primary-rgb) / <alpha-value>)',\n                secondary: 'rgb(var(--sq-color-secondary-rgb) / <alpha-value>)',\n                accent: 'rgb(var(--sq-color-accent-rgb) / <alpha-value>)',\n                muted: 'rgb(var(--sq-color-muted-text-rgb) / <alpha-value>)',\n                light: 'rgb(var(--sq-color-light-rgb) / <alpha-value>)',\n                dark: 'rgb(var(--sq-color-dark-rgb) / <alpha-value>)',\n            },\n            fontFamily: {\n                sans: ['var(--sq-font-sans)'],\n                serif: ['var(--sq-font-serif)'],\n                mono: ['var(--sq-font-mono)'],\n            },\n        },\n    },\n    plugins: [],\n}`;
+    const tailwindConfig = `/** @type {import('tailwindcss').Config} */
+module.exports = {
+    darkMode: ['selector', '.sq-theme-dark'],
+    content: [ './src/**/*.html' ],
+    theme: {
+        extend: {
+            screens: {
+                'sm':  '459px',
+                'md':  '768px',
+                'lg':  '992px',
+                'xl':  '1200px',
+                '2xl': '1400px',
+            },
+            container: {
+                center:  true,
+                padding: '1rem',
+            },
+            colors: {
+                primary: 'rgb(var(--sq-color-primary-rgb) / <alpha-value>)',
+                secondary: 'rgb(var(--sq-color-secondary-rgb) / <alpha-value>)',
+                accent: 'rgb(var(--sq-color-accent-rgb) / <alpha-value>)',
+                body: 'rgb(var(--sq-color-body-bg-rgb) / <alpha-value>)',
+                muted:   'rgb(var(--sq-color-muted-bg-rgb) / <alpha-value>)',
+                light:   'rgb(var(--sq-color-light-rgb) / <alpha-value>)',
+                dark:    'rgb(var(--sq-color-dark-rgb) / <alpha-value>)',
+                'transition-from': 'var(--sq-page-transition-from)',
+                'transition-via': 'var(--sq-page-transition-via)',
+                'transition-to': 'var(--sq-page-transition-to)',
+            },
+            textColor: {
+                heading: 'rgb(var(--sq-color-heading-text-rgb) / <alpha-value>)',
+                body: 'rgb(var(--sq-color-body-text-rgb) / <alpha-value>)',
+                muted: 'rgb(var(--sq-color-muted-text-rgb) / <alpha-value>)',
+            },
+            fontFamily: {
+                sans: ['var(--sq-font-sans)'],
+                serif: ['var(--sq-font-serif)'],
+                mono: ['var(--sq-font-mono)'],
+            },
+            fontSize: {
+                'display-1': ['8rem',    { lineHeight: '1',   letterSpacing: '-0.32rem' }],
+                'display-2': ['6rem',    { lineHeight: '1',   letterSpacing: '-0.24rem' }],
+                'display-3': ['5rem',    { lineHeight: '1',   letterSpacing: '-0.2rem'  }],
+                'display-4': ['4.5rem',  { lineHeight: '1',   letterSpacing: '-0.18rem' }],
+                'display-5': ['4rem',    { lineHeight: '1',   letterSpacing: '-0.16rem' }],
+                'display-6': ['3.5rem',  { lineHeight: '1',   letterSpacing: '-0.14rem' }],
+                'h1': ['3rem',    { lineHeight: '1.1', letterSpacing: '-0.12rem'  }],
+                'h2': ['2.5rem',  { lineHeight: '1.1', letterSpacing: '-0.08rem'  }],
+                'h3': ['2rem',    { lineHeight: '1.1', letterSpacing: '-0.07rem'  }],
+                'h4': ['1.5rem',  { lineHeight: '1.2', letterSpacing: '-0.06rem'  }],
+                'h5': ['1.25rem', { lineHeight: '1.2', letterSpacing: '-0.05rem'  }],
+                'h6': ['1rem',    { lineHeight: '1.2', letterSpacing: '-0.004rem' }],
+            },
+        },
+    },
+    plugins: [],
+}`;
     fs.writeFileSync(path.join(customerBuildDir, 'tailwind.config.js'), tailwindConfig);
 
     const postcssConfig = `module.exports = {\n  plugins: {\n    tailwindcss: {},\n    autoprefixer: {},\n  },\n}`;
     fs.writeFileSync(path.join(customerBuildDir, 'postcss.config.js'), postcssConfig);
 
-    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. **Colors:** Edit \`src/assets/scss/_config.scss\` — change \`$base-colors\` and \`$base-colors-dark\` maps\n4. **Theme overrides:** Edit files in \`src/assets/scss/themes/\`\n5. **Custom styles:** Add your CSS to \`src/assets/scss/custom.scss\`\n6. Build production assets to \`dist/\`: \`npm run build\`\n\n## File Update Safety\nWhen updating to a new version, these files can be safely replaced (your changes are in \`_config.scss\`, \`themes/\`, and \`custom.scss\` which are yours to keep):\n- \`_tokens.scss\` — auto-generated from \`_config.scss\`\n- \`_functions.scss\` — framework helper functions\n- \`_theme-engine.scss\` — theme generator mixin\n- \`main.scss\` — main import orchestrator\n\n**Never replace:** \`_config.scss\`, \`custom.scss\`, and any \`themes/*.scss\` files you have customized.\n`;
+    const readmeContent = `# ${config.name} - Customer Package\n\nThis package contains everything you need to use, customize, and deploy your template.\n\n## Directory Structure\n- \`src/\`: Developer Source files (\`npm run dev\` needed).\n- \`dist/\`: Production-ready compiled HTML snapshot (Drop into any hosting).\n- \`public/\`: Static assets served verbatim by Vite (do not edit).\n- \`scripts/\`: Post-build script \`rewrite-dist-html.js\` runs after \`vite build\` so \`dist/\` HTML matches framework format.\n\n## How to Customize Styles\n1. Install dependencies: \`npm install\`\n2. Run live development server: \`npm run dev\`\n3. **Colors:** Edit \`src/assets/scss/_config.scss\` — change \`$base-colors\` and \`$base-colors-dark\` maps\n4. **Theme overrides:** Edit files in \`src/assets/scss/themes/\`\n5. **Custom styles:** Add your CSS to \`src/assets/scss/custom.scss\`\n6. Build production: \`npm run build\` (overwrites \`dist/\`, then rewrites HTML to framework format).\n\n## File Update Safety\nWhen updating to a new version, these files can be safely replaced (your changes are in \`_config.scss\`, \`themes/\`, and \`custom.scss\` which are yours to keep):\n- \`_tokens.scss\` — auto-generated from \`_config.scss\`\n- \`_functions.scss\` — framework helper functions\n- \`_theme-engine.scss\` — theme generator mixin\n- \`main.scss\` — main import orchestrator\n\n**Never replace:** \`_config.scss\`, \`custom.scss\`, and any \`themes/*.scss\` files you have customized.\n`;
     fs.writeFileSync(path.join(customerBuildDir, 'README.md'), readmeContent);
-
-    // Helper to find the prettier executable in the main project
 
     // Format customer HTML files with Prettier (fallback in case snapshot.js Prettier was skipped)
     try {

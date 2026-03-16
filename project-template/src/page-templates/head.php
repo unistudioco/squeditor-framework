@@ -91,3 +91,10 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
       <?php endif; ?>
   <?php endif; ?>
 <?php endif; ?>
+
+<!-- UIkit Components JS (Early Init) -->
+<?php if ($is_vite): ?>
+  <script src="<?= $vite_server ?>/assets/js/uikit-components.js"></script>
+<?php else: ?>
+  <script src="assets/js/uikit-components.js"></script>
+<?php endif; ?>

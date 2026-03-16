@@ -14,8 +14,24 @@ $body_class   = trim($theme_class . ' ' . $schema_class . ' ' . ($body_class ?? 
 <!DOCTYPE html>
 <html lang="<?= $site['lang'] ?? 'en' ?>">
 <head>
-<?php require __DIR__ . '/head.php'; ?>
-<?php if (isset($extra_head)) echo $extra_head; ?>
+  <?php require __DIR__ . '/head.php'; ?>
+  <?php if (isset($extra_head)) echo $extra_head; ?>
+
+  <!-- FOUC Prevention Script for Dark Mode -->
+  <script>
+    (function () {
+      try {
+        var schema = localStorage.getItem('sq_schema');
+        if (schema === 'dark') {
+          document.documentElement.classList.add('sq-theme-dark');
+          document.documentElement.classList.remove('sq-theme-light');
+        } else if (schema === 'light') {
+          document.documentElement.classList.add('sq-theme-light');
+          document.documentElement.classList.remove('sq-theme-dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <?php
 $enable_cursor = $enable_cursor ?? ($site['enable_cursor'] ?? true);
@@ -48,21 +64,6 @@ $cursor_config = $cursor_config ?? ($site['cursor_config'] ?? '');
 
     <?php require __DIR__ . '/body-scripts.php'; ?>
 
-    <!-- FOUC Prevention Script for Dark Mode -->
-    <script>
-        (function () {
-            try {
-                var schema = localStorage.getItem('sq_schema');
-                if (schema === 'dark') {
-                    document.body.classList.remove('sq-theme-light');
-                    document.body.classList.add('sq-theme-dark');
-                } else if (schema === 'light') {
-                    document.body.classList.remove('sq-theme-dark');
-                    document.body.classList.add('sq-theme-light');
-                }
-            } catch (e) {}
-        })();
-    </script>
 
 </body>
 </html>
