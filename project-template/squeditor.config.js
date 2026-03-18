@@ -88,6 +88,9 @@ module.exports = {
     },
     dist: {
         zipName: 'squeditor-build.zip',
-        previewPlatform: 'netlify',
+    },
+    deploy: {
+        enabled: true,
+        platform: 'vercel', // 'netlify' or 'vercel'
     },
 };

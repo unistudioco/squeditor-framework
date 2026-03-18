@@ -125,7 +125,7 @@ html body .text-display-1, html body .text-display-2, html body .text-display-3,
                 $colors = $themeData['colors'];
                 ?>
                 <button 
-                    class="sq-js-theme-toggle w-full px-3 py-3 flex items-center justify-between rounded-xl text-sm transition-colors <?= $is_active ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium' : 'text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white' ?>"
+                    class="sq-js-theme-toggle w-full px-3 py-3 flex items-center justify-between rounded-xl text-sm  <?= $is_active ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium' : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white' ?>"
                     data-theme="<?= htmlspecialchars($key) ?>"
                     <?= $is_active ? 'disabled' : '' ?>
                 >
@@ -166,14 +166,14 @@ html body .text-display-1, html body .text-display-2, html body .text-display-3,
             <div class="py-2 text-xs font-medium text-muted">Schema</div>
             <div class="flex items-center gap-1 p-1 rounded-xl bg-zinc-100 dark:bg-zinc-800">
                 <button 
-                    class="sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all <?= ($active_schema === 'light') ? '!bg-transparent text-zinc-900 shadow-sm' : 'text-zinc-500' ?>"
+                    class="sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium <?= ($active_schema === 'light') ? '!bg-transparent text-zinc-900 shadow-sm' : 'text-zinc-500' ?>"
                     data-schema="light"
                 >
                     <span class="sq-icon-sun"></span>
                     Light
                 </button>
                 <button 
-                    class="sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all <?= ($active_schema === 'dark') ? '!bg-transparent text-white shadow-sm' : 'text-zinc-500' ?>"
+                    class="sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium <?= ($active_schema === 'dark') ? '!bg-transparent text-white shadow-sm' : 'text-zinc-500' ?>"
                     data-schema="dark"
                 >
                     <span class="sq-icon-moon"></span>
@@ -199,15 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
         schemaToggles.forEach(btn => {
             if (btn.getAttribute('data-schema') === schema) {
                 if (schema === 'light') {
-                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all bg-white text-zinc-900 shadow-sm';
+                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium bg-white text-zinc-900 shadow-sm';
                 } else {
-                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all bg-zinc-900 text-white shadow-sm';
+                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium bg-zinc-900 text-white shadow-sm';
                 }
             } else {
                 if (btn.getAttribute('data-schema') === 'light') {
-                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm text-white font-medium transition-all';
+                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm text-white font-medium';
                 } else {
-                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all';
+                    btn.className = 'sq-js-schema-toggle flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium';
                 }
             }
         });
@@ -227,9 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Update DOM class
             if (newSchema === 'dark') {
+                document.documentElement.classList.add('sq-theme-dark');
+                document.documentElement.classList.remove('sq-theme-light');
                 body.classList.add('sq-theme-dark');
                 body.classList.remove('sq-theme-light');
             } else {
+                document.documentElement.classList.remove('sq-theme-dark');
+                document.documentElement.classList.add('sq-theme-light');
                 body.classList.remove('sq-theme-dark');
                 body.classList.add('sq-theme-light');
             }
@@ -267,9 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.disabled = isMatch;
                 
                 // Refresh class list for visual feedback
-                const baseClass = "sq-js-theme-toggle w-full px-3 py-3 flex items-center justify-between rounded-xl text-sm transition-colors ";
+                const baseClass = "sq-js-theme-toggle w-full px-3 py-3 flex items-center justify-between rounded-xl text-sm  ";
                 const activeClass = "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-medium";
-                const inactiveClass = "text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white";
+                const inactiveClass = "text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white";
                 
                 btn.className = baseClass + (isMatch ? activeClass : inactiveClass);
                 
@@ -340,9 +344,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update button visual state
         typoSels.forEach(btn => {
             if (btn.getAttribute('data-preset') === presetKey) {
-                btn.className = 'sq-js-typo-toggle flex items-center justify-center p-2 rounded-xl text-xs font-medium transition-all bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border-none ring-0';
+                btn.className = 'sq-js-typo-toggle flex items-center justify-center p-2 rounded-xl text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white border-none ring-0';
             } else {
-                btn.className = 'sq-js-typo-toggle flex items-center justify-center p-2 rounded-xl text-xs font-medium transition-all text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border-none ring-0';
+                btn.className = 'sq-js-typo-toggle flex items-center justify-center p-2 rounded-xl text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 border-none ring-0';
             }
         });
     };

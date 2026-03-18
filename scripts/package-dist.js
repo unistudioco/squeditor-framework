@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { projectRoot, config } = require('./utils/core');
+const deploy = require('./utils/deploy');
+
+const projectRoot = process.cwd();
+const config = require(path.join(projectRoot, 'squeditor.config.js'));
 const ui = require('./utils/cli-ui');
 
 const distDir = path.join(projectRoot, 'dist');
@@ -32,24 +35,5 @@ requiredDirs.forEach(dir => {
     }
 });
 
-// 2. Deploy preview
-function deployPreview() {
-    const platform = config.dist.previewPlatform;
-    if (!platform) return; // Skip deployment if none configured
-    ui.header('Deploying Preview');
-    ui.step(`Deploying preview to ${platform}...`, 'rocket');
-
-    if (platform === 'netlify') {
-        try {
-            execSync('netlify deploy --dir=dist', { stdio: 'inherit', cwd: projectRoot });  // removed --open for headless
-        } catch (e) { ui.error("Failed to deploy netlify (you may need to login or install CLI)"); }
-    } else if (platform === 'vercel') {
-        try {
-            execSync('vercel dist --yes', { stdio: 'inherit', cwd: projectRoot });
-        } catch (e) { ui.error("Failed to deploy vercel"); }
-    } else {
-        ui.warning('Unknown preview platform. Set config.dist.previewPlatform to "netlify" or "vercel".');
-    }
-}
-
-deployPreview();
+// 2. Deploy preview via modular system
+deploy.run(projectRoot, config);

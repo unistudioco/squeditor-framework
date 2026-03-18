@@ -31,6 +31,19 @@ $body_class   = trim($theme_class . ' ' . $schema_class . ' ' . ($body_class ?? 
         }
       } catch (e) {}
     })();
+    // Once the body is parsed, sync its class with the schema from localStorage
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            var schema = localStorage.getItem('sq_schema');
+            if (schema === 'dark') {
+                document.body.classList.add('sq-theme-dark');
+                document.body.classList.remove('sq-theme-light');
+            } else if (schema === 'light') {
+                document.body.classList.add('sq-theme-light');
+                document.body.classList.remove('sq-theme-dark');
+            }
+        } catch (e) {}
+    });
   </script>
 </head>
 <?php
