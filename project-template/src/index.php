@@ -29,11 +29,11 @@ $body_class = 'page-home';
 ob_start();
 ?>
 
-    <section class="py-32 md:py-48 flex items-center justify-center bg-gradient-to-b from-zinc-100 to-transparent" data-uk-height-viewport="offset-top: true">
+    <section class="py-32 md:py-48 flex items-center justify-center bg-muted" data-uk-height-viewport="offset-top: true">
         <div class="max-w-4xl mx-auto px-6 text-center" data-gsap-timeline="{defaults: {duration: 1.2, ease: 'power4.out', delay: 0.8}}">
             
             <h2 class="text-6xl font-bold tracking-tight mb-8 lg:px-8" data-gsap="from: {y: 60, opacity: 0, filter: 'blur(20px)'}">
-                Start building <span class="bg-gradient-to-r from-zinc-500 via-zinc-400 to-zinc-200 text-transparent bg-clip-text">creative websites</span> with Squeditor
+                Start building <span class="text-secondary">creative websites</span> with Squeditor
             </h2>
             
             <p class="text-xl text-muted max-w-2xl mx-auto font-light leading-relaxed mb-12" data-gsap="position: '<-0.5'; from: {y: 40, opacity: 0, filter: 'blur(10px)'}">
@@ -41,10 +41,10 @@ ob_start();
             </p>
 
             <div class="flex items-center justify-center gap-4" data-gsap="position: '<-0.5'; from: {y: 20, opacity: 0, filter: 'blur(5px)'}">
-                <a href="https://squeditor.com/" class="btn btn-lg btn-secondary hover:scale-105 transition-transform">
+                <a href="https://squeditor.com/" class="btn btn-lg btn-secondary hover:scale-105">
                     Try Squeditor
                 </a>
-                <a href="https://docs.squeditor.com/" class="btn btn-lg !border !border-1 !border-solid !border-zinc-200 hover:scale-105 transition-transform">
+                <a href="https://docs.squeditor.com/" class="btn btn-lg btn-ghost border hover:scale-105">
                     View Docs
                 </a>
             </div>

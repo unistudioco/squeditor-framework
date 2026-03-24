@@ -59,5 +59,25 @@ module.exports = {
             },
         },
     },
-    plugins: [],
+    plugins: [
+        function({ addUtilities }) {
+            addUtilities({
+                '.sq-bg-primary': {
+                    '--sq-contrast-color': 'var(--sq-color-primary-contrast)',
+                    'background-color': 'rgb(var(--sq-color-primary-rgb) / var(--tw-bg-opacity, 1))',
+                    'color': 'var(--sq-contrast-color)',
+                },
+                '.sq-bg-secondary': {
+                    '--sq-contrast-color': 'var(--sq-color-secondary-contrast)',
+                    'background-color': 'rgb(var(--sq-color-secondary-rgb) / var(--tw-bg-opacity, 1))',
+                    'color': 'var(--sq-contrast-color)',
+                },
+                '.sq-bg-accent': {
+                    '--sq-contrast-color': 'var(--sq-color-accent-contrast)',
+                    'background-color': 'rgb(var(--sq-color-accent-rgb) / var(--tw-bg-opacity, 1))',
+                    'color': 'var(--sq-contrast-color)',
+                },
+            })
+        }
+    ],
 }

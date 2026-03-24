@@ -117,9 +117,24 @@ function get_asset(string $path): string {
  */
 function get_image(string $filename, string $alt = '', string $class = '', bool $inline = false): string {
     $full_path = SRC_PATH . '/assets/static/images/' . ltrim($filename, '/');
+    
+    // If the requested image doesn't exist, handle it based on site config
     if (!file_exists($full_path)) {
-        trigger_error("Image not found: {$full_path}", E_USER_WARNING);
-        return '';
+        global $site;
+        $use_fallback = isset($site['image_fallback']) && $site['image_fallback'] === true;
+
+        if ($use_fallback) {
+            $filename = 'placeholder.png';
+            $full_path = SRC_PATH . '/assets/static/images/' . $filename;
+            
+            // If even the placeholder is missing, return empty
+            if (!file_exists($full_path)) {
+                return '';
+            }
+        } else {
+            trigger_error("Image not found: {$full_path}", E_USER_WARNING);
+            return '';
+        }
     }
     
     if ($inline) {

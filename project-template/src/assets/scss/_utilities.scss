@@ -1,51 +1,8 @@
 // _utilities.scss
 
-.sq-text-gradient {
-    background: linear-gradient(135deg, var(--sq-color-primary), var(--sq-color-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-// Background and Contrast Text Utilities
-.sq-bg-primary {
-    --sq-contrast-color: var(--sq-color-primary-contrast);
-    background-color: rgb(var(--sq-color-primary-rgb) / var(--tw-bg-opacity, 1));
-    color: var(--sq-contrast-color);
-}
-
-.sq-bg-secondary {
-    --sq-contrast-color: var(--sq-color-secondary-contrast);
-    background-color: rgb(var(--sq-color-secondary-rgb) / var(--tw-bg-opacity, 1));
-    color: var(--sq-contrast-color);
-}
-
-.sq-bg-accent {
-    --sq-contrast-color: var(--sq-color-accent-contrast);
-    background-color: rgb(var(--sq-color-accent-rgb) / var(--tw-bg-opacity, 1));
-    color: var(--sq-contrast-color);
-}
-
-.bg-body {
-    background-color: rgb(var(--sq-color-body-bg-rgb) / var(--tw-bg-opacity, 1));
-}
-
-.bg-muted {
-    background-color: rgb(var(--sq-color-muted-bg-rgb) / var(--tw-bg-opacity, 1));
-}
-
-.text-heading {
-    color: rgb(var(--sq-color-heading-text-rgb) / var(--tw-text-opacity, 1));
-}
-
-.text-body {
-    color: rgb(var(--sq-color-body-text-rgb) / var(--tw-text-opacity, 1));
-}
-
-.text-muted {
-    color: rgb(var(--sq-color-muted-text-rgb) / var(--tw-text-opacity, 1));
-}
-
-.sq-text-contrast {
-    color: var(--sq-contrast-color, inherit);
+// Headline Highlight Effect
+.sq-highlight {
+    @apply bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent;
+    display: inline-block;
+    position: relative;
 }

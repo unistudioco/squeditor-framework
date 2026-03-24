@@ -13,6 +13,7 @@ $site = [
     'page_transition' => 'disabled', // Options: 'curve', 'wave', 'blinds', 'slide', 'disabled'
     'enable_cursor'   => false,      // Global GSAP Cursor State
     'cursor_config'   => '',         // Default cursor settings
+    'enable_theme_switcher' => true,  // Toggle the floating theme switcher
 
     'nav' => [
         ['label' => 'Products', 'url' => '#'],

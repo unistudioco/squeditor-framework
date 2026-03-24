@@ -51,7 +51,7 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
   <?php if ($active_slider): ?><link rel="stylesheet" href="<?= $vite_server ?>/assets/css/slider.min.css"><?php endif; ?>
   <link rel="stylesheet" href="<?= $vite_server ?>/assets/css/tailwind.css">
   <script type="module" src="<?= $vite_server ?>/assets/scss/main.scss"></script>
-  <?php if ($site['demo_mode']): ?>
+  <?php if (isset($site['demo_mode']) && $site['demo_mode']): ?>
       <?php foreach ($theme_entries as $themeKey): ?>
           <script type="module" src="<?= $vite_server ?>/assets/scss/theme-<?= htmlspecialchars($themeKey) ?>.scss"></script>
       <?php endforeach; ?>
@@ -77,7 +77,7 @@ if (file_exists(__DIR__ . '/../config/theme-entries.php')) {
   <?php if ($active_slider): ?><link rel="stylesheet" href="assets/css/slider.min.css"><?php endif; ?>
   <link rel="stylesheet" href="assets/css/tailwind.css">
   <link rel="stylesheet" href="assets/css/main.min.css">
-  <?php if ($site['demo_mode']): ?>
+  <?php if (isset($site['demo_mode']) && $site['demo_mode']): ?>
       <?php foreach ($theme_entries as $themeKey): ?>
           <link rel="stylesheet" href="assets/css/theme-<?= htmlspecialchars($themeKey) ?>.min.css">
       <?php endforeach; ?>

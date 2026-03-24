@@ -1,4 +1,7 @@
 // _base.scss
+:root {
+    @apply selection:bg-black/10 dark:selection:bg-white/10;
+}
 
 *,
 ::before,
@@ -10,6 +13,8 @@ body {
     font-family: var(--sq-font-sans);
     color: var(--sq-color-body-text);
     background-color: var(--sq-color-body-bg);
+    line-height: var(--sq-body-line-height, 1.5);
+    letter-spacing: var(--sq-body-letter-spacing, normal);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -26,7 +31,6 @@ h6,
     font-weight: var(--sq-heading-font-weight, 600);
     line-height: var(--sq-heading-line-height, 1.2);
     letter-spacing: var(--sq-heading-letter-spacing, normal);
-    text-transform: var(--sq-heading-text-transform, unset);
 }
 
 h1 {
@@ -53,24 +57,14 @@ h6 {
     @apply text-sm uppercase tracking-wider;
 }
 
-.text-muted {
-    color: var(--sq-color-muted-text);
-}
-
-.bg-muted {
-    background-color: var(--sq-color-muted-bg);
-}
-
-// Headline Highlight Effect
-.sq-highlight {
-    @apply bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent;
-    display: inline-block;
-    position: relative;
+.sq-nav-link,
+.btn {
+    font-weight: 600;
 }
 
 // Badge styling
 .sq-badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium tracking-tight mb-6 border;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-6 border;
     color: var(--sq-color-secondary);
 }
 

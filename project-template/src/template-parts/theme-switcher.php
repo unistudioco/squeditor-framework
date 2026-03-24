@@ -1,6 +1,6 @@
 <?php
-// Only render if demo mode is enabled
-if (!$site['demo_mode']) {
+// Only render if demo mode and theme switcher are enabled
+if (!$site['demo_mode'] || !($site['enable_theme_switcher'] ?? true)) {
     return;
 }
 
@@ -13,10 +13,10 @@ $active_schema = $site['schema'] ?? 'light';
 // We define the key brand/body colors for each theme manually for the switcher UI.
 $available_themes = [
     'modern' => [
-        'label' => 'Modern',
+        'label' => 'Default',
         'colors' => ['#1c2020', '#1f8fc7', '#ff7640', '#FFFFFF', '#707070']
     ],
-    'two' => [
+    'classic' => [
         'label' => 'Classic',
         'colors' => ['#272164', '#f5590b', '#f59e0b', '#f4f1eb', '#272164']
     ],
@@ -24,21 +24,25 @@ $available_themes = [
         'label' => 'Tech',
         'colors' => ['#1f2937', '#fda088', '#fe7c72', '#ffffff', '#716969']
     ],
-    'creative' => [
-        'label' => 'Creative',
-        'colors' => ['#111113', '#e6a3e7', '#3d3add', '#ffffff', '#030b17']
+    'finance' => [
+        'label' => 'Finance',
+        'colors' => ['#022f34', '#46c672', '#cbdf2d', '#eef5eb', '#022f34']
     ],
     'ai' => [
         'label' => 'AI',
         'colors' => ['#222224', '#3f2ed9', '#dbf15e', '#f9f9f9', '#89898e']
+    ],
+    'creative' => [
+        'label' => 'Creative',
+        'colors' => ['#111113', '#e6a3e7', '#3d3add', '#ffffff', '#030b17']
     ]
 ];
 
 $typography_presets = [
     'modern' => [
-        'label' => 'Modern',
+        'label' => 'Default',
         'heading_font' => 'TASA Orbiter',
-        'heading_fw' => '600',
+        'heading_fw' => '700',
         'heading_lh' => '1',
         'heading_ls' => '-0.04em',
         'body_font' => 'TASA Orbiter',
@@ -47,7 +51,7 @@ $typography_presets = [
     ],
     'classic' => [
         'label' => 'Classic',
-        'heading_font' => 'Vidaloka',
+        'heading_font' => 'Playfair Display',
         'heading_fw' => '400',
         'heading_lh' => '1',
         'heading_ls' => '-0.04em',
@@ -71,7 +75,7 @@ $typography_presets = [
         'heading_fw' => '700',
         'heading_lh' => '1',
         'heading_ls' => '-0.06em',
-        'body_font' => 'Mabry Pro',
+        'body_font' => 'Bricolage Grotesque',
         'body_lh' => '1.6',
         'body_ls' => 'normal',
     ]
@@ -85,7 +89,7 @@ $typography_presets = [
     --sq-font-sans: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     --sq-font-heading: "TASA Orbiter", "IBM Plex Sans Arabic", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
     --sq-heading-line-height: 1.2 !important;
-    --sq-heading-font-weight: 600 !important;
+    --sq-heading-font-weight: 700 !important;
     --sq-heading-letter-spacing: normal !important;
     --sq-body-line-height: 1.5 !important;
     --sq-body-letter-spacing: normal !important;
@@ -111,9 +115,10 @@ html body .text-display-1, html body .text-display-2, html body .text-display-3,
     <button class="w-12 h-12 rounded-full bg-white dark:bg-zinc-800 shadow-xl border border-zinc-200 dark:border-zinc-700 flex items-center justify-center hover:scale-105 transition-transform" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Theme Settings" data-sq-cursor-stick>
         <span class="sq-icon-palette"></span>
     </button>
-    <div data-uk-dropdown="mode: click; pos: top-right; offset: 12; animation: uk-animation-slide-bottom-small" class="uk-dropdown uk-dropdown-top-right !p-6 !bg-white dark:!bg-zinc-900 !rounded-2xl !shadow-xl !border min-w-[300px] overflow-hidden">
+    <div data-uk-dropdown="mode: click; pos: top-left; offset: 12; animation: uk-animation-slide-bottom-small" class="uk-dropdown uk-dropdown-top-left !p-6 !bg-white dark:!bg-zinc-900 !rounded-2xl !shadow-xl !border !min-w-[280px] !max-w-[90vw] overflow-hidden">
         <div class="flex items-center justify-between pointer-events-none">
             <h4 class="text-h6 m-0">Theme Settings</h4>
+            <button class="sq-js-reset-theme btn btn-sm btn-primary pointer-events-auto !py-0 !px-2 !h-7 !rounded-md">Reset</button>
         </div>
         <!-- Theme List -->
         <div class="flex flex-col gap-1 mt-2">
@@ -363,6 +368,17 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('sq_typo_preset', presetKey);
         });
     });
+    
+    // 4. Reset to Default
+    const resetBtn = document.querySelector('.sq-js-reset-theme');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            localStorage.removeItem('sq_theme');
+            localStorage.removeItem('sq_schema');
+            localStorage.removeItem('sq_typo_preset');
+            window.location.reload();
+        });
+    }
     
 });
 </script>
