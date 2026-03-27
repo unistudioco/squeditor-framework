@@ -116,29 +116,46 @@ function get_asset(string $path): string {
  * @return string           Image tag or file contents, or empty string if not found
  */
 function get_image(string $filename, string $alt = '', string $class = '', bool $inline = false): string {
-    $full_path = SRC_PATH . '/assets/static/images/' . ltrim($filename, '/');
+    $is_external = preg_match('/^(https?:)?\/\//i', $filename);
     
-    // If the requested image doesn't exist, handle it based on site config
-    if (!file_exists($full_path)) {
-        global $site;
-        $use_fallback = isset($site['image_fallback']) && $site['image_fallback'] === true;
+    if (!$is_external) {
+        $full_path = SRC_PATH . '/assets/static/images/' . ltrim($filename, '/');
+        
+        // If the requested image doesn't exist, handle it based on site config
+        if (!file_exists($full_path)) {
+            global $site;
+            $use_fallback = isset($site['image_fallback']) && $site['image_fallback'] === true;
 
-        if ($use_fallback) {
-            $filename = 'placeholder.png';
-            $full_path = SRC_PATH . '/assets/static/images/' . $filename;
-            
-            // If even the placeholder is missing, return empty
-            if (!file_exists($full_path)) {
+            if ($use_fallback) {
+                $filename = 'placeholder.png';
+                $full_path = SRC_PATH . '/assets/static/images/' . $filename;
+                
+                // If even the placeholder is missing, return empty
+                if (!file_exists($full_path)) {
+                    return '';
+                }
+            } else {
+                trigger_error("Image not found: {$full_path}", E_USER_WARNING);
                 return '';
             }
-        } else {
-            trigger_error("Image not found: {$full_path}", E_USER_WARNING);
-            return '';
         }
+        $source_path = $full_path;
+        $web_path = '/assets/static/images/' . ltrim($filename, '/');
+    } else {
+        $source_path = $filename;
+        $web_path = $filename;
     }
     
     if ($inline) {
-        $svg_content = file_get_contents($full_path);
+        $svg_content = $is_external ? @file_get_contents($source_path) : file_get_contents($source_path);
+        
+        if ($svg_content === false) {
+            if ($is_external) {
+                trigger_error("External image not found or could not be loaded: {$source_path}", E_USER_WARNING);
+            }
+            return '';
+        }
+        
         if ($class !== '') {
             $class_attr = htmlspecialchars($class);
             if (preg_match('/<svg\s[^>]*class=([\'"])(.*?)\1/is', $svg_content, $matches)) {
@@ -150,11 +167,6 @@ function get_image(string $filename, string $alt = '', string $class = '', bool 
         }
         return $svg_content;
     }
-    
-    // We assume images are served from /assets/static/images/ relative to document root
-    // This path might need to be adjusted based on the server setup, but for now 
-    // it returns a relative web path.
-    $web_path = '/assets/static/images/' . ltrim($filename, '/');
     
     $class_attr = $class !== '' ? sprintf(' class="%s"', htmlspecialchars($class)) : '';
     
