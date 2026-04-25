@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const { spawn, execSync } = require('child_process');
-const { projectRoot, fwRoot, config, findPrettier, stripDevContent } = require('./utils/core');
+const { spawn } = require('child_process');
+const { projectRoot, fwRoot, config, stripDevContent, stripVoidSlashes, formatHtmlFiles, walkHtmlFiles } = require('./utils/core');
 const resolvePages = require('./utils/resolve-pages');
 const getAvailablePort = require('./get-port');
 const ui = require('./utils/cli-ui');
@@ -112,7 +112,7 @@ async function runSnapshot() {
                 fs.mkdirSync(themeDistDir, { recursive: true });
 
                 const rewrittenHtml = rewriteLinks(html, savePath, distSubfolder);
-                const cleanedHtml = stripDevContent(rewrittenHtml);
+                const cleanedHtml = stripVoidSlashes(stripDevContent(rewrittenHtml));
 
                 const fullPath = path.join(themeDistDir, savePath);
                 fs.mkdirSync(path.dirname(fullPath), { recursive: true });
@@ -122,18 +122,17 @@ async function runSnapshot() {
             }
         }
 
-        // Format all generated HTML with Prettier
-        try {
-            const prettierBin = findPrettier();
-            const prettierConfig = path.join(projectRoot, '.prettierrc');
-            ui.step('Formatting HTML with Prettier...', 'pretty');
-            // We use relative globs and explicitly set cwd to the dist folder to be safer with Prettier version behavior
-            execSync(`"${prettierBin}" --write "**/*.html" --config "${prettierConfig}"`, { 
-                stdio: 'ignore', // SILENT PRETTIER
-                cwd: distDir 
-            });
-        } catch (err) {
-            ui.warning(`Prettier formatting issue: ${err.message}`);
+        // Format all generated HTML with Prettier (Node API — no shell/glob issues)
+        ui.step('Formatting HTML with Prettier...', 'pretty');
+        const prettierConfig = path.join(projectRoot, '.prettierrc');
+        const { ok, error } = await formatHtmlFiles(distDir, prettierConfig);
+        if (!ok) ui.warning(`Prettier formatting issue: ${error}`);
+
+        // formatHtmlFiles() already applies stripVoidSlashes() per-file.
+        // Run one final pass to catch any files that may have been written
+        // outside the formatter (e.g. pages that errored mid-format).
+        for (const f of walkHtmlFiles(distDir)) {
+            fs.writeFileSync(f, stripVoidSlashes(fs.readFileSync(f, 'utf8')));
         }
 
         ui.success('Snapshot complete.');

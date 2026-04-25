@@ -113,9 +113,10 @@ function get_asset(string $path): string {
  * @param string $alt       Alt text for the image (if returning an <img> tag)
  * @param string $class     Custom CSS class(es) to add to the <img> tag
  * @param bool   $inline    Whether to return raw file contents (e.g. inline SVG). Default false.
+ * @param string $attr      Additional raw attributes (e.g. data-gsap="reveal-up")
  * @return string           Image tag or file contents, or empty string if not found
  */
-function get_image(string $filename, string $alt = '', string $class = '', bool $inline = false): string {
+function get_image(string $filename, string $alt = '', string $class = '', bool $inline = false, string $attr = ''): string {
     $is_external = preg_match('/^(https?:)?\/\//i', $filename);
     
     if (!$is_external) {
@@ -165,21 +166,29 @@ function get_image(string $filename, string $alt = '', string $class = '', bool 
                 $svg_content = preg_replace('/<svg(\s|>)/is', '<svg class="' . $class_attr . '"$1', $svg_content, 1);
             }
         }
+
+        if ($attr !== '') {
+            $svg_content = preg_replace('/<svg(\s|>)/is', '<svg ' . $attr . '$1', $svg_content, 1);
+        }
+
         return $svg_content;
     }
     
     $class_attr = $class !== '' ? sprintf(' class="%s"', htmlspecialchars($class)) : '';
+    $extra_attr = $attr !== '' ? ' ' . $attr : '';
     
-    return sprintf('<img src="%s" alt="%s"%s>', htmlspecialchars($web_path), htmlspecialchars($alt), $class_attr);
+    return sprintf('<img src="%s" alt="%s"%s%s>', htmlspecialchars($web_path), htmlspecialchars($alt), $class_attr, $extra_attr);
 }
 
 /**
  * Get the path to a video file in the assets/static/videos/ directory.
  *
+ *
  * @param string $filename  Filename inside src/assets/static/videos/, e.g., 'medical-clinic-entrance.mp4'
- * @return string           Web path to the video file, or empty string if not found
+ * @param string $attr      Additional raw attributes (e.g. autoplay muted loop)
+ * @return string           Web path to the video file, or an HTML <video> tag if $attr is provided
  */
-function get_video(string $filename): string {
+function get_video(string $filename, string $attr = ''): string {
     $full_path = SRC_PATH . '/assets/static/videos/' . ltrim($filename, '/');
     if (!file_exists($full_path)) {
         trigger_error("Video not found: {$full_path}", E_USER_WARNING);
@@ -187,5 +196,11 @@ function get_video(string $filename): string {
     }
     
     // We assume videos are served from /assets/static/videos/ relative to document root
-    return 'assets/static/videos/' . ltrim($filename, '/');
+    $web_path = 'assets/static/videos/' . ltrim($filename, '/');
+
+    if ($attr === '') {
+        return $web_path;
+    }
+
+    return sprintf('<video src="%s" %s></video>', htmlspecialchars($web_path), $attr);
 }

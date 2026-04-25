@@ -5,7 +5,7 @@
 const fs   = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-const { projectRoot, config, findPrettier, safeMkdir, stripDevContent, stripDemoContent } = require('./utils/core');
+const { projectRoot, config, findPrettier, safeMkdir, stripDevContent, stripDemoContent, stripVoidSlashes, formatHtmlFiles } = require('./utils/core');
 const fwRoot = path.resolve(projectRoot, config.framework);
 const ui     = require('./utils/cli-ui');
 
@@ -530,9 +530,11 @@ async function createCustomerPackage() {
         fs.copyFileSync(prettierrcSrc, path.join(customerBuildDir, '.prettierrc'));
     } else {
         fs.writeFileSync(path.join(customerBuildDir, '.prettierrc'),
-            JSON.stringify({ printWidth: 10000, tabWidth: 4, useTabs: false, semi: true,
-                singleQuote: true, trailingComma: 'es5', bracketSpacing: true,
-                htmlWhitespaceSensitivity: 'ignore' }, null, 2)
+            JSON.stringify({
+                printWidth: 10000, tabWidth: 4, useTabs: false, semi: true,
+                singleQuote: false, trailingComma: 'es5', bracketSpacing: true,
+                htmlWhitespaceSensitivity: 'ignore', endOfLine: 'lf',
+            }, null, 2)
         );
     }
 
@@ -696,13 +698,29 @@ npm run build    # rebuild dist/
 
     // ── 9. Format + ZIP ───────────────────────────────────────────────────────
 
-    try {
-        ui.step('Formatting customer HTML files with Prettier...', 'pretty');
-        const prettierBin = findPrettier();
-        execSync(`"${prettierBin}" --write "src/**/*.html" "dist/**/*.html"`, { cwd: customerBuildDir, stdio: 'ignore' });
-    } catch {
-        ui.warning('Prettier formatting skipped or errored.');
+    // Format customer HTML using the Prettier Node API (no CLI shell/glob issues)
+    ui.step('Formatting customer HTML files with Prettier...', 'pretty');
+    const prettierConfig = path.join(projectRoot, '.prettierrc');
+    const { ok: fmtOk, error: fmtErr } = await formatHtmlFiles(
+        [path.join(customerBuildDir, 'dist'), path.join(customerBuildDir, 'src')],
+        prettierConfig
+    );
+    if (!fmtOk) ui.warning(`Prettier formatting issue: ${fmtErr || 'unknown error'}`);
+
+    // Strip any trailing slashes Prettier may have (re-)introduced on void elements.
+    // Prettier's HTML formatter emits XHTML-style <img /> which fails W3C validation.
+    function walkAndStripSlashes(dir) {
+        if (!fs.existsSync(dir)) return;
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, entry.name);
+            if (entry.isDirectory()) { walkAndStripSlashes(full); }
+            else if (entry.name.endsWith('.html')) {
+                fs.writeFileSync(full, stripVoidSlashes(fs.readFileSync(full, 'utf8')));
+            }
+        }
     }
+    walkAndStripSlashes(path.join(customerBuildDir, 'dist'));
+    walkAndStripSlashes(path.join(customerBuildDir, 'src'));
 
     ui.step(`Zipping to ${zipName}...`, 'package');
     try {
