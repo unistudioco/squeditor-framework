@@ -111,7 +111,7 @@ async function runSnapshot() {
                 const themeDistDir = path.join(distDir, distSubfolder);
                 fs.mkdirSync(themeDistDir, { recursive: true });
 
-                const rewrittenHtml = rewriteLinks(html, savePath, distSubfolder);
+                const rewrittenHtml = rewriteLinks(html, savePath, distSubfolder, themeLookup);
                 const cleanedHtml = stripVoidSlashes(stripDevContent(rewrittenHtml));
 
                 const fullPath = path.join(themeDistDir, savePath);
@@ -159,22 +159,68 @@ function fetchPage(url) {
     });
 }
 
-function rewriteLinks(html, savePath, distSubfolder) {
+function rewriteLinks(html, savePath, distSubfolder, themeLookup) {
     let result = html;
     
-    // Calculate relative path back to dist root
+    // Calculate relative path prefix back to dist root (for assets)
     const subfolderDepth = distSubfolder ? distSubfolder.split('/').filter(Boolean).length : 0;
     const savePathDepth = path.dirname(savePath) === '.' ? 0 : path.dirname(savePath).split('/').length;
-    
     const totalDepth = subfolderDepth + savePathDepth;
-    const prefix = totalDepth > 0 ? '../'.repeat(totalDepth) : '';
+    const assetPrefix = totalDepth > 0 ? '../'.repeat(totalDepth) : '';
 
-    // Rewrite root-relative and purely relative references to depth-adjusted references
+    // Build a lookup: filename.html -> distSubfolder for all themed pages
+    // so we can resolve page-to-page links correctly
+    const pageSubfolderMap = {};
+    if (themeLookup) {
+        for (const [pagePath, info] of Object.entries(themeLookup)) {
+            // pagePath is like "/finance-login.php"
+            let filename = pagePath.startsWith('/') ? pagePath.slice(1) : pagePath;
+            if (rewriteExtension && filename.endsWith('.php')) {
+                filename = filename.replace(/\.php$/, '.html');
+            }
+            pageSubfolderMap[filename] = info.distSubfolder || '';
+        }
+    }
+
+    // Rewrite href/src paths with subfolder awareness
     result = result.replace(/(href|src)=["']\/?([^"']+)["']/g, (match, attr, targetPath) => {
-        if (targetPath.startsWith('http') || targetPath.startsWith('//') || targetPath.startsWith('#')) {
+        // Skip absolute URLs, protocol-relative, anchors, and data URIs
+        if (targetPath.startsWith('http') || targetPath.startsWith('//') || 
+            targetPath.startsWith('#') || targetPath.startsWith('data:') ||
+            targetPath.startsWith('mailto:') || targetPath.startsWith('tel:')) {
             return match;
         }
-        return `${attr}="${prefix}${targetPath}"`;
+
+        // Normalize: strip any leading slash
+        const cleanTarget = targetPath.startsWith('/') ? targetPath.slice(1) : targetPath;
+
+        // Check if this target is a known themed page (href only)
+        if (attr === 'href') {
+            // Try matching as-is, or with .html extension rewrite
+            const targetHtml = cleanTarget.endsWith('.php') && rewriteExtension
+                ? cleanTarget.replace(/\.php$/, '.html')
+                : cleanTarget;
+
+            // Strip query string / hash for lookup
+            const targetBase = targetHtml.split('?')[0].split('#')[0];
+
+            if (targetBase in pageSubfolderMap) {
+                const targetSubfolder = pageSubfolderMap[targetBase];
+
+                if (targetSubfolder === distSubfolder) {
+                    // Same subfolder: sibling-relative (no prefix needed)
+                    return `${attr}="${targetHtml}"`;
+                } else {
+                    // Different subfolder: navigate up to dist root, then down into target subfolder
+                    const upToRoot = totalDepth > 0 ? '../'.repeat(totalDepth) : '';
+                    const downInto = targetSubfolder ? targetSubfolder + '/' : '';
+                    return `${attr}="${upToRoot}${downInto}${targetHtml}"`;
+                }
+            }
+        }
+
+        // Default: asset paths or unknown pages — prefix to reach dist root
+        return `${attr}="${assetPrefix}${cleanTarget}"`;
     });
 
     if (rewriteExtension) {
