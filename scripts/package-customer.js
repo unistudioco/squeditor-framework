@@ -461,6 +461,20 @@ async function createCustomerPackage() {
         ui.warning('dist/assets/js not found — run npm run build:css in the main project first.');
     }
 
+    // Also pick up orphaned JS chunks at dist/assets/ root (legacy builds without chunkFileNames)
+    const distAssetsDir = path.join(distDir, 'assets');
+    if (fs.existsSync(distAssetsDir)) {
+        for (const file of fs.readdirSync(distAssetsDir)) {
+            if (file.endsWith('.js') && !file.endsWith('.json')) {
+                const src = path.join(distAssetsDir, file);
+                if (fs.statSync(src).isFile()) {
+                    fs.mkdirSync(customerDistJsDir, { recursive: true });
+                    fs.copyFileSync(src, path.join(customerDistJsDir, file));
+                }
+            }
+        }
+    }
+
     // ── 5. Theme CSS → dist/ ─────────────────────────────────────────────────
 
     if (config.themes) {
