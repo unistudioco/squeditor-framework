@@ -591,6 +591,19 @@ async function createCustomerPackage() {
 import path from 'path';
 import fs from 'fs';
 
+// Auto-detect GSAP module files as named entries → guaranteed hash-free output.
+// Named entries use entryFileNames (no hash), unlike dynamic-import chunks which
+// Rollup may hash even when chunkFileNames omits [hash].
+const gsapModulesDir = path.resolve(__dirname, 'src/assets/js/gsap-modules');
+const gsapModuleInputs = {};
+if (fs.existsSync(gsapModulesDir)) {
+    fs.readdirSync(gsapModulesDir)
+        .filter(f => f.endsWith('.js'))
+        .forEach(f => {
+            gsapModuleInputs[f.replace('.js', '')] = path.resolve(gsapModulesDir, f);
+        });
+}
+
 export default defineConfig({
     root: 'src',
     base: './',
@@ -615,10 +628,11 @@ export default defineConfig({
                 warn(warning);
             },
             input: {
-${rollupInputs}            },
+${rollupInputs}                ...gsapModuleInputs,
+            },
             output: {
                 entryFileNames: 'assets/js/[name].js',
-                chunkFileNames: 'assets/js/chunks/[name].js',
+                chunkFileNames: 'assets/js/[name].js',
                 assetFileNames: (assetInfo) => {
                     const name = assetInfo.names?.[0] ?? (assetInfo.name || '');
 
